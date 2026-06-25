@@ -1,0 +1,119 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model RiskScenario {
+  id             String   @id
+  rawText        String
+  parsedJson     String
+  exposureAmount Float
+  timeWindowJson String
+  status         String
+  createdAt      DateTime @default(now())
+
+  matchResults MatchResult[]
+  hedgePlans   HedgePlan[]
+  auditLogs    AuditLog[]
+}
+
+model MarketSnapshot {
+  id            String   @id
+  provider      String
+  marketId      String
+  title         String
+  rules         String
+  riskType      String
+  payloadJson   String
+  pricesJson    String
+  orderbookJson String
+  closeTime     DateTime
+  status        String
+  fetchedAt     DateTime @default(now())
+
+  matchResults MatchResult[]
+
+  @@unique([provider, marketId])
+}
+
+model MatchResult {
+  id               String @id
+  scenarioId       String
+  marketSnapshotId String
+  score            Float
+  direction        String
+  rationaleJson    String
+  basisRiskNotes   String
+
+  scenario       RiskScenario   @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  marketSnapshot MarketSnapshot @relation(fields: [marketSnapshotId], references: [id], onDelete: Cascade)
+}
+
+model HedgePlan {
+  id              String   @id
+  scenarioId      String
+  totalBudget     Float
+  targetCoverage  Float
+  estimatedCost   Float
+  maxPayout       Float
+  quoteCreatedAt  DateTime
+  quoteExpiresAt  DateTime
+  status          String
+  payloadJson     String
+  createdAt       DateTime @default(now())
+
+  scenario RiskScenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  legs     HedgeLeg[]
+}
+
+model HedgeLeg {
+  id              String @id
+  hedgePlanId     String
+  provider        String
+  marketId        String
+  side            String
+  quantity        Float
+  limitPrice      Float
+  estimatedCost   Float
+  estimatedPayout Float
+  orderType       String
+
+  hedgePlan HedgePlan @relation(fields: [hedgePlanId], references: [id], onDelete: Cascade)
+}
+
+model OrderIntent {
+  id              String   @id
+  hedgePlanId     String
+  payloadHash     String
+  userConfirmedAt DateTime
+  status          String
+  createdAt       DateTime @default(now())
+}
+
+model OrderExecution {
+  id              String   @id
+  orderIntentId   String?
+  providerOrderId String?
+  provider        String
+  filledQuantity  Float
+  averagePrice    Float
+  status          String
+  rawResponse     String
+  createdAt       DateTime @default(now())
+}
+
+model AuditLog {
+  id         String   @id
+  scenarioId String?
+  action     String
+  entityType String
+  entityId   String
+  metadata   String
+  createdAt  DateTime @default(now())
+
+  scenario RiskScenario? @relation(fields: [scenarioId], references: [id], onDelete: SetNull)
+}
