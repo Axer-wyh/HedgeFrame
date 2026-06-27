@@ -766,10 +766,24 @@ function MatchesPanel({
     <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
       {matches.map((match, index) => {
         const selected = selectedMarketIds.includes(match.market.id);
+        const toggleMarket = () => onToggleMarket(match.market.id);
         return (
           <Reveal key={match.market.id} delay={index * 0.03}>
             <div
-              className={`flex min-h-44 flex-col rounded-[16px] border p-3 transition ${
+              data-market-card
+              data-selected={selected ? "true" : "false"}
+              role="button"
+              tabIndex={0}
+              aria-pressed={selected}
+              aria-label={`${selected ? "Unselect" : "Select"} ${match.market.title}`}
+              onClick={toggleMarket}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  toggleMarket();
+                }
+              }}
+              className={`flex min-h-44 cursor-pointer flex-col rounded-[16px] border p-3 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(var(--hf-accent))] ${
                 selected
                   ? "border-[rgb(var(--hf-accent))]/75 bg-[rgb(var(--hf-accent))]/10"
                   : "border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel))] hover:border-[rgb(var(--hf-line-strong))]"
@@ -788,17 +802,14 @@ function MatchesPanel({
                     rel="noopener noreferrer"
                     title="Open source market"
                     aria-label={`Open ${match.market.provider} market page for ${match.market.title}`}
+                    onClick={(event) => event.stopPropagation()}
                     className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border border-[rgb(var(--hf-line))] text-[rgb(var(--hf-muted))] transition hover:border-[rgb(var(--hf-accent))] hover:text-[rgb(var(--hf-accent))] active:translate-y-px"
                   >
                     <ArrowSquareOut size={15} weight="bold" />
                   </a>
                 ) : null}
               </div>
-              <button
-                type="button"
-                onClick={() => onOpenDetails(match)}
-                className="block flex-1 text-left transition active:translate-y-px"
-              >
+              <div className="block flex-1 text-left">
                 <h3
                   data-market-card-title
                   className="line-clamp-2 text-base font-semibold leading-snug tracking-[-0.015em]"
@@ -815,17 +826,16 @@ function MatchesPanel({
                   <Metric label="Ask" value={`$${match.market.bestAsk.toFixed(2)}`} />
                   <Metric label="Liquidity" value={formatMoney(match.market.liquidity)} />
                 </div>
-              </button>
+              </div>
               <button
                 type="button"
-                onClick={() => onToggleMarket(match.market.id)}
-                className={`mt-4 inline-flex h-9 items-center justify-center rounded-[8px] border px-3 text-sm font-semibold transition active:translate-y-px ${
-                  selected
-                    ? "border-[rgb(var(--hf-accent))] bg-[rgb(var(--hf-accent))] text-[rgb(var(--hf-ink))]"
-                    : "border-[rgb(var(--hf-line-strong))] text-[rgb(var(--hf-text))] hover:bg-[rgb(var(--hf-field))]"
-                }`}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onOpenDetails(match);
+                }}
+                className="mt-4 inline-flex h-9 items-center justify-center rounded-[8px] border border-[rgb(var(--hf-line-strong))] px-3 text-sm font-semibold text-[rgb(var(--hf-text))] transition hover:border-[rgb(var(--hf-accent))] hover:bg-[rgb(var(--hf-field))] active:translate-y-px"
               >
-                {selected ? "Selected" : "Select"}
+                View details
               </button>
             </div>
           </Reveal>

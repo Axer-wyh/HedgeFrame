@@ -42,15 +42,21 @@ test("weather event user can create and execute a Kalshi demo hedge", async ({
   );
   await expect(sourceMarketLink).toHaveAttribute("target", "_blank");
   await expect(page.locator("[data-market-card-title]")).toHaveCount(15);
+  await expect(page.locator("[data-market-card]")).toHaveCount(15);
   await expect(page.getByText("Showing 1-15 of 15")).toBeVisible();
   await expect(page.getByText("30 per page")).toBeVisible();
   await expect(page.getByRole("button", { name: "Previous page" })).toBeDisabled();
   await expect(page.getByRole("button", { name: "Next page" })).toBeDisabled();
   await expect(page.getByRole("button", { name: /Continue 1\/15/ })).toBeEnabled();
-  await page.getByRole("button", { name: "Selected", exact: true }).first().click();
+  const firstMarketCard = page.locator("[data-market-card]").first();
+  await expect(firstMarketCard).toHaveAttribute("data-selected", "true");
+  await expect(firstMarketCard.getByRole("button", { name: "View details" })).toBeVisible();
+  await firstMarketCard.click();
   await expect(page.getByRole("button", { name: /Continue 0\/15/ })).toBeDisabled();
-  await page.getByRole("button", { name: "Select", exact: true }).first().click();
+  await expect(firstMarketCard).toHaveAttribute("data-selected", "false");
+  await firstMarketCard.click();
   await expect(page.getByRole("button", { name: /Continue 1\/15/ })).toBeEnabled();
+  await expect(firstMarketCard).toHaveAttribute("data-selected", "true");
   const filterWidths = await Promise.all(
     ["All", "Kalshi demo", "Polymarket", "Others"].map(async (name) => {
       const box = await page.getByRole("button", { name, exact: true }).boundingBox();
@@ -72,7 +78,8 @@ test("weather event user can create and execute a Kalshi demo hedge", async ({
   );
   await expect(page.getByText("Direction").first()).toBeVisible();
   await expect(page.getByText("Buy Yes").first()).toBeVisible();
-  await page.locator("[data-market-card-title]").first().click();
+  await firstMarketCard.getByRole("button", { name: "View details" }).click();
+  await expect(page.getByRole("button", { name: /Continue 1\/15/ })).toBeEnabled();
   const marketDialog = page.getByRole("dialog", {
     name: "Will Austin record heavy rain on Oct 12, 2026?",
   });
