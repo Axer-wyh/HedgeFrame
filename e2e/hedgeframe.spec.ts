@@ -76,15 +76,21 @@ test("weather event user can create and execute a Kalshi demo hedge", async ({
   });
   await expect(marketDialog).toBeVisible();
   await expect(page.getByRole("img", { name: /Probability trend for Will Austin record heavy rain/ })).toBeVisible();
-  await expect(page.getByText("Current probability")).toBeVisible();
-  await expect(page.getByText("Event detail and settlement rule")).toBeVisible();
-  await expect(marketDialog.getByText("Order preview")).toBeVisible();
-  await expect(marketDialog.getByLabel("Expected quantity")).toHaveValue("100");
-  await marketDialog.getByLabel("Expected quantity").fill("250");
+  await expect(marketDialog.getByText("YES", { exact: true })).toBeVisible();
+  await expect(marketDialog.getByText("NO", { exact: true })).toBeVisible();
+  await expect(page.getByText("Rules and market background")).toBeVisible();
+  await expect(marketDialog.getByRole("button", { name: "展开" })).toBeVisible();
+  await expect(marketDialog.getByText("Order ticket")).toBeVisible();
+  await expect(marketDialog.getByRole("button", { name: "Buy" })).toBeVisible();
+  await expect(marketDialog.getByRole("button", { name: "Sell" })).toBeVisible();
+  await expect(marketDialog.getByRole("button", { name: /Yes 32%/ })).toBeVisible();
+  await expect(marketDialog.getByRole("button", { name: /No 68%/ })).toBeVisible();
+  await expect(marketDialog.getByLabel("Quantity")).toHaveValue("100");
+  await marketDialog.getByRole("button", { name: "250" }).click();
+  await expect(marketDialog.getByLabel("Quantity")).toHaveValue("250");
   await expect(marketDialog.getByText("$80.00")).toBeVisible();
   await expect(marketDialog.getByText("Demo balance")).toBeVisible();
-  await expect(marketDialog.getByText("Market stats")).toBeVisible();
-  await expect(page.getByText("Basis risk notes")).toBeVisible();
+  await expect(marketDialog.getByRole("button", { name: "Confirm" })).toBeVisible();
   await page.getByRole("button", { name: "Close market details" }).click();
   await expect(page.getByRole("dialog", { name: "Will Austin record heavy rain on Oct 12, 2026?" })).toBeHidden();
 
