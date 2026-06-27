@@ -8,6 +8,11 @@ export type Provider = "kalshi" | "polymarket";
 export type MarketSide = "yes" | "no";
 export type OrderType = "limit";
 
+export type ProbabilityPoint = {
+  timestamp: string;
+  probability: number;
+};
+
 export type RiskScenario = {
   id?: string;
   rawText: string;
@@ -39,6 +44,7 @@ export type MarketCandidate = {
   outcomes: ["yes", "no"];
   bestBid: number;
   bestAsk: number;
+  probabilityHistory?: ProbabilityPoint[];
   liquidity: number;
   openInterest: number;
   status: "open" | "closed" | "paused";

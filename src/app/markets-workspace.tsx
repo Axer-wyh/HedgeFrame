@@ -23,6 +23,7 @@ import { IdentityPanel, type IdentityPanelMode } from "./identity-panel";
 import { AnimatedTabs, DecryptedText, Reveal, SuccessRipple } from "./motion-primitives";
 import type {
   HedgePlan,
+  MarketCandidate,
   MatchResult,
   OrderExecution,
   RiskScenario,
@@ -869,8 +870,9 @@ function MarketDetailDialog({
 
         <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_220px]">
           <div className="space-y-4">
+            <ProbabilityTrendChart market={match.market} />
             <section className="rounded-[12px] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-field))] p-4">
-              <h3 className="text-sm font-semibold">Settlement rule</h3>
+              <h3 className="text-sm font-semibold">Event detail and settlement rule</h3>
               <p className="mt-2 text-sm leading-6 text-[rgb(var(--hf-muted))]">
                 {match.market.rules}
               </p>
@@ -933,6 +935,120 @@ function MarketDetailDialog({
         </div>
       </div>
     </div>
+  );
+}
+
+function ProbabilityTrendChart({ market }: { market: MarketCandidate }) {
+  const history = getProbabilityHistory(market);
+  const lastPoint = history[history.length - 1];
+  const currentProbability = lastPoint?.probability ?? market.bestAsk;
+  const low = Math.min(...history.map((point) => point.probability));
+  const high = Math.max(...history.map((point) => point.probability));
+  const trendDelta = currentProbability - history[0].probability;
+  const chart = buildProbabilityChart(history);
+
+  return (
+    <section className="rounded-[14px] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-field))] p-4">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h3 className="text-base font-semibold">Probability trend</h3>
+          <p className="mt-1 text-sm leading-6 text-[rgb(var(--hf-muted))]">
+            YES implied probability, shown as mock market history for this demo.
+          </p>
+        </div>
+        <div className="rounded-[10px] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel))] px-3 py-2 text-right">
+          <div className="font-mono text-[11px] text-[rgb(var(--hf-muted))]">
+            Current probability
+          </div>
+          <div className="font-mono text-2xl font-semibold text-[rgb(var(--hf-accent))]">
+            {formatPercent(currentProbability)}
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 overflow-hidden rounded-[12px] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel))]">
+        <svg
+          role="img"
+          aria-label={`Probability trend for ${market.title}`}
+          viewBox="0 0 720 280"
+          className="h-72 w-full"
+          preserveAspectRatio="none"
+        >
+          <rect width="720" height="280" fill="rgb(var(--hf-panel))" />
+          {chart.gridLines.map((line) => (
+            <g key={line.label}>
+              <line
+                x1="48"
+                x2="696"
+                y1={line.y}
+                y2={line.y}
+                stroke="rgb(var(--hf-line))"
+                strokeWidth="1"
+              />
+              <text
+                x="18"
+                y={line.y + 4}
+                fill="rgb(var(--hf-muted))"
+                fontSize="11"
+                fontFamily="monospace"
+              >
+                {line.label}
+              </text>
+            </g>
+          ))}
+          <path d={chart.areaPath} fill="rgb(var(--hf-accent))" opacity="0.12" />
+          <path
+            d={chart.linePath}
+            fill="none"
+            stroke="rgb(var(--hf-accent))"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+          />
+          {chart.points.map((point, index) => (
+            <circle
+              key={`${point.x}-${point.y}-${index}`}
+              cx={point.x}
+              cy={point.y}
+              r={index === chart.points.length - 1 ? 5 : 3}
+              fill={index === chart.points.length - 1 ? "rgb(var(--hf-accent))" : "rgb(var(--hf-panel))"}
+              stroke="rgb(var(--hf-accent))"
+              strokeWidth="2"
+              vectorEffect="non-scaling-stroke"
+            />
+          ))}
+          <text
+            x="48"
+            y="262"
+            fill="rgb(var(--hf-muted))"
+            fontSize="11"
+            fontFamily="monospace"
+          >
+            {formatShortDate(history[0].timestamp)}
+          </text>
+          <text
+            x="648"
+            y="262"
+            fill="rgb(var(--hf-muted))"
+            fontSize="11"
+            fontFamily="monospace"
+          >
+            {formatShortDate(lastPoint.timestamp)}
+          </text>
+        </svg>
+      </div>
+
+      <div className="mt-3 grid gap-2 sm:grid-cols-4">
+        <Metric label="Bid" value={formatPercent(market.bestBid)} />
+        <Metric label="Ask" value={formatPercent(market.bestAsk)} />
+        <Metric label="Range" value={`${formatPercent(low)}-${formatPercent(high)}`} />
+        <Metric
+          label="Move"
+          value={`${trendDelta >= 0 ? "+" : ""}${formatPercent(trendDelta)}`}
+        />
+      </div>
+    </section>
   );
 }
 
@@ -1132,4 +1248,80 @@ function formatMoney(value: number) {
     currency: "USD",
     maximumFractionDigits: 0,
   }).format(value);
+}
+
+function formatPercent(value: number) {
+  return `${Math.round(value * 100)}%`;
+}
+
+function formatShortDate(timestamp: string) {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+  }).format(new Date(timestamp));
+}
+
+function getProbabilityHistory(market: MarketCandidate) {
+  if (market.probabilityHistory && market.probabilityHistory.length >= 2) {
+    return market.probabilityHistory;
+  }
+
+  const seed = Array.from(market.id).reduce(
+    (sum, char) => sum + char.charCodeAt(0),
+    0,
+  );
+  const closeTime = Date.parse(market.closeTime);
+  const points = 8;
+
+  return Array.from({ length: points }, (_, index) => {
+    const progress = index / (points - 1);
+    const wave = Math.sin(seed * 0.17 + index * 0.92) * 0.035;
+    const drift = (market.bestAsk - market.bestBid) * (progress - 0.5);
+    const probability =
+      index === points - 1
+        ? market.bestAsk
+        : clampProbability(market.bestAsk - 0.035 + drift + wave);
+
+    return {
+      timestamp: new Date(
+        closeTime - (points - index - 1) * 36 * 60 * 60 * 1000,
+      ).toISOString(),
+      probability,
+    };
+  });
+}
+
+function buildProbabilityChart(
+  history: Array<{ timestamp: string; probability: number }>,
+) {
+  const width = 720;
+  const height = 280;
+  const padding = { top: 24, right: 24, bottom: 42, left: 48 };
+  const chartWidth = width - padding.left - padding.right;
+  const chartHeight = height - padding.top - padding.bottom;
+  const minValue = 0;
+  const maxValue = 1;
+  const bottom = padding.top + chartHeight;
+  const points = history.map((point, index) => {
+    const x =
+      padding.left + (chartWidth * index) / Math.max(1, history.length - 1);
+    const y =
+      padding.top + chartHeight - ((point.probability - minValue) / (maxValue - minValue)) * chartHeight;
+
+    return { x, y };
+  });
+  const linePath = points
+    .map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`)
+    .join(" ");
+  const areaPath = `${linePath} L ${points[points.length - 1].x} ${bottom} L ${points[0].x} ${bottom} Z`;
+  const gridLines = [0.2, 0.4, 0.6, 0.8].map((value) => ({
+    label: formatPercent(value),
+    y: padding.top + chartHeight - value * chartHeight,
+  }));
+
+  return { points, linePath, areaPath, gridLines };
+}
+
+function clampProbability(value: number) {
+  return Math.max(0.02, Math.min(0.98, Math.round(value * 1000) / 1000));
 }

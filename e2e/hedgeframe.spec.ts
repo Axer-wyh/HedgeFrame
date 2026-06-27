@@ -72,6 +72,9 @@ test("weather event user can create and execute a Kalshi demo hedge", async ({
   );
   await page.locator("[data-market-card-title]").first().click();
   await expect(page.getByRole("dialog", { name: "Will Austin record heavy rain on Oct 12, 2026?" })).toBeVisible();
+  await expect(page.getByRole("img", { name: /Probability trend for Will Austin record heavy rain/ })).toBeVisible();
+  await expect(page.getByText("Current probability")).toBeVisible();
+  await expect(page.getByText("Event detail and settlement rule")).toBeVisible();
   await expect(page.getByText("Basis risk notes")).toBeVisible();
   await page.getByRole("button", { name: "Close market details" }).click();
   await expect(page.getByRole("dialog", { name: "Will Austin record heavy rain on Oct 12, 2026?" })).toBeHidden();
