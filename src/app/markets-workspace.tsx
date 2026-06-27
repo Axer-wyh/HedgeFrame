@@ -34,6 +34,8 @@ type MarketFilter = "all" | "kalshi" | "polymarket" | "blocked";
 type MarketSort = "default" | "liquidity" | "relevance" | "timeliness";
 
 const MATCHES_PER_PAGE = 30;
+const DETAIL_DEMO_BALANCE = 12000;
+const DEFAULT_DETAIL_QUANTITY = 100;
 
 const fallbackScenario =
   "My outdoor event loses $80k if heavy rain hits Austin on Oct 12.";
@@ -836,6 +838,13 @@ function MarketDetailDialog({
   onClose: () => void;
   onToggleMarket: () => void;
 }) {
+  const [quantity, setQuantity] = useState(String(DEFAULT_DETAIL_QUANTITY));
+  const parsedQuantity = Math.max(0, Math.floor(Number(quantity) || 0));
+  const estimatedCost = roundCurrency(parsedQuantity * match.market.bestAsk);
+  const maxPayout = parsedQuantity;
+  const remainingBalance = roundCurrency(DETAIL_DEMO_BALANCE - estimatedCost);
+  const balanceExceeded = remainingBalance < 0;
+
   return (
     <div
       className="fixed inset-0 z-50 grid place-items-center bg-black/70 px-4 py-8 backdrop-blur-sm"
@@ -901,14 +910,109 @@ function MarketDetailDialog({
             </section>
           </div>
           <aside className="space-y-3">
-            <Metric label="Score" value={String(Math.round(match.score))} />
-            <Metric label="Ask" value={`$${match.market.bestAsk.toFixed(2)}`} />
-            <Metric label="Liquidity" value={formatMoney(match.market.liquidity)} />
-            <Metric label="Open interest" value={formatMoney(match.market.openInterest)} />
-            <Metric
-              label="Closes"
-              value={new Date(match.market.closeTime).toLocaleDateString()}
-            />
+            <section className="rounded-[14px] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-field))] p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h3 className="text-base font-semibold">Order preview</h3>
+                  <p className="mt-1 text-xs leading-5 text-[rgb(var(--hf-muted))]">
+                    Demo YES position sizing.
+                  </p>
+                </div>
+                <Badge>{match.market.executionMode}</Badge>
+              </div>
+
+              <div className="mt-4 border-y border-[rgb(var(--hf-line))] py-3">
+                <div className="flex items-end justify-between gap-4">
+                  <div>
+                    <div className="font-mono text-[11px] text-[rgb(var(--hf-muted))]">
+                      Ask price
+                    </div>
+                    <div className="mt-1 font-mono text-2xl font-semibold text-[rgb(var(--hf-accent))]">
+                      ${match.market.bestAsk.toFixed(2)}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-mono text-[11px] text-[rgb(var(--hf-muted))]">
+                      YES probability
+                    </div>
+                    <div className="mt-1 font-mono text-sm font-semibold">
+                      {formatPercent(match.market.bestAsk)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <label
+                htmlFor={`quantity-${match.market.id}`}
+                className="mt-4 block text-xs font-medium text-[rgb(var(--hf-muted))]"
+              >
+                Expected quantity
+              </label>
+              <input
+                id={`quantity-${match.market.id}`}
+                type="number"
+                min="0"
+                step="1"
+                inputMode="numeric"
+                value={quantity}
+                onChange={(event) => setQuantity(event.target.value)}
+                onBlur={() => {
+                  if (quantity.trim() === "") setQuantity("0");
+                }}
+                className="mt-2 h-11 w-full rounded-[10px] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel))] px-3 font-mono text-sm text-[rgb(var(--hf-text))] outline-none transition focus:border-[rgb(var(--hf-accent))] focus:ring-2 focus:ring-[rgb(var(--hf-accent))]/25"
+              />
+
+              <div className="mt-4 space-y-2 text-sm">
+                <PreviewRow
+                  label="Estimated cost"
+                  value={formatMoneyWithCents(estimatedCost)}
+                />
+                <PreviewRow label="Max payout" value={formatMoney(maxPayout)} />
+                <PreviewRow
+                  label="Demo balance"
+                  value={formatMoney(DETAIL_DEMO_BALANCE)}
+                />
+                <PreviewRow
+                  label="Remaining"
+                  value={formatMoneyWithCents(Math.max(0, remainingBalance))}
+                  muted={balanceExceeded}
+                />
+              </div>
+              {balanceExceeded ? (
+                <p className="mt-3 rounded-[10px] border border-red-300/30 bg-red-950/30 p-2 text-xs leading-5 text-red-100/80">
+                  Quantity exceeds the demo balance. Reduce size before continuing.
+                </p>
+              ) : null}
+
+              <button
+                type="button"
+                onClick={onToggleMarket}
+                className={`mt-4 inline-flex h-10 w-full items-center justify-center rounded-[8px] border px-3 text-sm font-semibold transition active:translate-y-px ${
+                  selected
+                    ? "border-[rgb(var(--hf-accent))] bg-[rgb(var(--hf-accent))] text-[rgb(var(--hf-ink))]"
+                    : "border-[rgb(var(--hf-line-strong))] text-[rgb(var(--hf-text))] hover:bg-[rgb(var(--hf-panel))]"
+                }`}
+              >
+                {selected ? "Selected" : "Select"}
+              </button>
+            </section>
+
+            <section className="rounded-[14px] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-field))] p-4">
+              <h3 className="text-sm font-semibold">Market stats</h3>
+              <dl className="mt-3 divide-y divide-[rgb(var(--hf-line))]">
+                <StatRow label="Score" value={String(Math.round(match.score))} />
+                <StatRow label="Liquidity" value={formatMoney(match.market.liquidity)} />
+                <StatRow
+                  label="Open interest"
+                  value={formatMoney(match.market.openInterest)}
+                />
+                <StatRow
+                  label="Closes"
+                  value={new Date(match.market.closeTime).toLocaleDateString()}
+                />
+              </dl>
+            </section>
+
             {match.market.sourceUrl ? (
               <a
                 href={match.market.sourceUrl}
@@ -920,20 +1024,43 @@ function MarketDetailDialog({
                 <ArrowSquareOut size={15} weight="bold" />
               </a>
             ) : null}
-            <button
-              type="button"
-              onClick={onToggleMarket}
-              className={`inline-flex h-10 w-full items-center justify-center rounded-[8px] border px-3 text-sm font-semibold transition active:translate-y-px ${
-                selected
-                  ? "border-[rgb(var(--hf-accent))] bg-[rgb(var(--hf-accent))] text-[rgb(var(--hf-ink))]"
-                  : "border-[rgb(var(--hf-line-strong))] text-[rgb(var(--hf-text))] hover:bg-[rgb(var(--hf-field))]"
-              }`}
-            >
-              {selected ? "Selected" : "Select"}
-            </button>
           </aside>
         </div>
       </div>
+    </div>
+  );
+}
+
+function PreviewRow({
+  label,
+  value,
+  muted = false,
+}: {
+  label: string;
+  value: string;
+  muted?: boolean;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <span className="text-[rgb(var(--hf-muted))]">{label}</span>
+      <span
+        className={`font-mono font-semibold ${
+          muted ? "text-red-100" : "text-[rgb(var(--hf-text))]"
+        }`}
+      >
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function StatRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-3 py-2 text-sm">
+      <dt className="text-[rgb(var(--hf-muted))]">{label}</dt>
+      <dd className="text-right font-mono font-semibold text-[rgb(var(--hf-text))]">
+        {value}
+      </dd>
     </div>
   );
 }
@@ -1248,6 +1375,19 @@ function formatMoney(value: number) {
     currency: "USD",
     maximumFractionDigits: 0,
   }).format(value);
+}
+
+function formatMoneyWithCents(value: number) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: value > 0 && value < 100 ? 2 : 0,
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
+function roundCurrency(value: number) {
+  return Math.round(value * 100) / 100;
 }
 
 function formatPercent(value: number) {
