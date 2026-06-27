@@ -19,10 +19,10 @@ describe("HomePage", () => {
       }),
     ).toBeInTheDocument();
     expect(
-      screen.getAllByText(
-        "Build hedges faster with prediction-market tools.",
-      ).length,
-    ).toBeGreaterThan(0);
+      screen.getByRole("heading", {
+        name: "Build hedges faster with prediction-market tools.",
+      }),
+    ).toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: "Map markets" }).length).toBeGreaterThan(0);
     expect(screen.getByRole("button", { name: /Markets/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Log in" })).toBeInTheDocument();

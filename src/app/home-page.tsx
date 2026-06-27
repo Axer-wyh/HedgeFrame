@@ -30,7 +30,9 @@ const sampleScenario =
   "My outdoor event loses $80k if heavy rain hits Austin on Oct 12.";
 
 const heroTitle = "AI and prediction markets based hedging tool.";
-const visionLine = "Build hedges faster with prediction-market tools.";
+const visionLinePrimary = "Build hedges faster with";
+const visionLineSecondary = "prediction-market tools.";
+const visionLine = `${visionLinePrimary} ${visionLineSecondary}`;
 
 const marketMenu = [
   ["Weather events", "Rain, snow, heat, wind, and event-window exposure."],
@@ -300,12 +302,12 @@ function PinnedHero({
     ["inset(0% 0% 32% 70%)", "inset(0% 0% 0% 0%)"],
   );
   const visionTextLeft = useTransform(scrollY, [0, 1040], ["72.8%", "13.2%"]);
-  const visionTextTop = useTransform(scrollY, [0, 1040], ["50%", "27.8%"]);
+  const visionTextTop = useTransform(scrollY, [0, 1040, 1280], ["50%", "27.8%", "5%"]);
   const visionTextWidth = useTransform(scrollY, [0, 1040], ["43%", "73.6%"]);
-  const visionTextScale = useTransform(scrollY, [0, 1040], [0.58, 1]);
+  const visionTextScale = useTransform(scrollY, [0, 1040], [0.46, 1]);
   const visionBadgesOpacity = useTransform(scrollY, [520, 900], [0, 1]);
-  const promptOpacity = useTransform(scrollY, [1180, 1520], [0, 1]);
-  const promptY = useTransform(scrollY, [1180, 1520], [38, 0]);
+  const promptOpacity = useTransform(scrollY, [1040, 1280], [0, 1]);
+  const promptY = useTransform(scrollY, [1040, 1280], [38, 0]);
 
   const introStyle = reduce ? { opacity: 0 } : { opacity: introOpacity, y: introY };
   const newsStyle = reduce ? { opacity: 0 } : { opacity: newsOpacity, y: newsY };
@@ -335,7 +337,7 @@ function PinnedHero({
       id="top"
       ref={ref}
       data-hero-scroll
-      className="relative h-[240dvh] border-b border-[rgb(var(--hf-line))]"
+      className="relative h-[320dvh] border-b border-[rgb(var(--hf-line))]"
     >
       <div className="sticky top-14 h-[calc(100dvh-56px)] overflow-hidden bg-[rgb(var(--hf-bg))]">
         <div
@@ -371,8 +373,12 @@ function PinnedHero({
                 </span>
               ))}
             </motion.div>
-            <h2 className="text-[clamp(48px,5.4vw,86px)] font-semibold leading-[0.94] tracking-[-0.075em]">
-              {visionLine}
+            <h2
+              aria-label={visionLine}
+              className="text-[clamp(48px,5.4vw,86px)] font-semibold leading-[0.94] tracking-[-0.075em]"
+            >
+              <span className="block whitespace-nowrap">{visionLinePrimary}</span>{" "}
+              <span className="block whitespace-nowrap">{visionLineSecondary}</span>
             </h2>
             <motion.div
               data-hero-prompt
