@@ -282,25 +282,44 @@ function PinnedHero({
   const reduce = useReducedMotion();
   const { scrollY } = useScroll();
 
-  const panelsOpacity = useTransform(scrollY, [0, 500], [1, 0]);
-  const panelsY = useTransform(scrollY, [0, 640], [0, -96]);
-  const panelsScale = useTransform(scrollY, [0, 640], [1, 0.97]);
-  const visionOpacity = useTransform(scrollY, [520, 940], [0, 1]);
-  const visionY = useTransform(scrollY, [520, 940], [86, 0]);
-  const visionScale = useTransform(scrollY, [520, 980], [0.74, 1]);
-  const promptOpacity = useTransform(scrollY, [980, 1360], [0, 1]);
-  const promptY = useTransform(scrollY, [980, 1360], [42, 0]);
-  const mosaicShift = useTransform(scrollY, [0, 900], [0, -58]);
-  const mosaicOpacity = useTransform(scrollY, [0, 900], [1, 0.32]);
+  const introOpacity = useTransform(scrollY, [0, 560], [1, 0]);
+  const introY = useTransform(scrollY, [0, 640], [0, -300]);
+  const newsOpacity = useTransform(scrollY, [0, 500], [1, 0]);
+  const newsY = useTransform(scrollY, [0, 650], [0, 260]);
+  const mosaicX = useTransform(scrollY, [0, 520, 960, 1280], [0, -40, -150, -230]);
+  const mosaicY = useTransform(scrollY, [0, 520, 960, 1280], [0, -70, -230, -280]);
+  const mosaicScaleX = useTransform(scrollY, [0, 440, 840, 1120, 1340], [1, 0.72, 0.34, 0.08, 0.015]);
+  const mosaicScaleY = useTransform(scrollY, [0, 720, 1340], [1, 1.08, 1.18]);
+  const mosaicOpacity = useTransform(scrollY, [1160, 1440], [1, 0]);
+  const visionClipPath = useTransform(
+    scrollY,
+    [0, 1040],
+    ["inset(0% 0% 32% 70%)", "inset(0% 0% 0% 0%)"],
+  );
+  const visionSeedOpacity = useTransform(scrollY, [0, 720], [1, 0]);
+  const visionBodyOpacity = useTransform(scrollY, [650, 1040], [0, 1]);
+  const visionBodyY = useTransform(scrollY, [650, 1040], [64, 0]);
+  const visionBodyScale = useTransform(scrollY, [650, 1040], [0.84, 1]);
+  const promptOpacity = useTransform(scrollY, [1180, 1520], [0, 1]);
+  const promptY = useTransform(scrollY, [1180, 1520], [38, 0]);
 
-  const panelsStyle = reduce
+  const introStyle = reduce ? { opacity: 0 } : { opacity: introOpacity, y: introY };
+  const newsStyle = reduce ? { opacity: 0 } : { opacity: newsOpacity, y: newsY };
+  const mosaicStyle = reduce
     ? { opacity: 0 }
-    : { opacity: panelsOpacity, y: panelsY, scale: panelsScale };
-  const visionStyle = reduce
+    : {
+        opacity: mosaicOpacity,
+        scaleX: mosaicScaleX,
+        scaleY: mosaicScaleY,
+        x: mosaicX,
+        y: mosaicY,
+      };
+  const visionPanelStyle = reduce ? { clipPath: "inset(0% 0% 0% 0%)" } : { clipPath: visionClipPath };
+  const visionSeedStyle = reduce ? { opacity: 0 } : { opacity: visionSeedOpacity };
+  const visionBodyStyle = reduce
     ? { opacity: 1 }
-    : { opacity: visionOpacity, y: visionY, scale: visionScale };
+    : { opacity: visionBodyOpacity, y: visionBodyY, scale: visionBodyScale };
   const promptStyle = reduce ? { opacity: 1 } : { opacity: promptOpacity, y: promptY };
-  const mosaicStyle = reduce ? undefined : { y: mosaicShift, opacity: mosaicOpacity };
 
   return (
     <section
@@ -310,75 +329,35 @@ function PinnedHero({
       className="relative h-[240dvh] border-b border-[rgb(var(--hf-line))]"
     >
       <div className="sticky top-14 h-[calc(100dvh-56px)] overflow-hidden bg-[rgb(var(--hf-bg))]">
-        <motion.div
-          data-hero-panels
-          style={panelsStyle}
-          className="absolute inset-0 grid origin-center grid-cols-[minmax(0,1fr)_432px] grid-rows-[minmax(0,1fr)_330px]"
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 z-0 grid grid-cols-[minmax(0,1fr)_432px] grid-rows-[minmax(0,1fr)_330px]"
         >
-          <div className="border-r border-b border-[rgb(var(--hf-line))] p-10">
-            <div className="flex h-full flex-col justify-end">
-              <p className="mb-6 max-w-fit bg-[rgb(var(--hf-accent))] px-2 py-1 font-mono text-xs text-[rgb(var(--hf-ink))]">
-                Prediction-market hedge discovery
-              </p>
-              <h1 className="max-w-[900px] text-[clamp(68px,7vw,116px)] font-semibold leading-[0.9] tracking-[-0.08em]">
-                AI and prediction markets for long-tail hedging.
-              </h1>
-            </div>
-          </div>
-
-          <div className="border-b border-[rgb(var(--hf-line))] p-10">
-            <div className="flex h-full items-end">
-              <p className="max-w-[21ch] text-4xl font-semibold leading-[1.02] tracking-[-0.055em]">
-                We help you quickly build risk-transfer and hedge strategies with prediction-market tools.
-              </p>
-            </div>
-          </div>
-
-          <motion.div
-            aria-hidden="true"
-            style={mosaicStyle}
-            className="relative overflow-hidden border-r border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel))]"
-          >
-            <PixelMosaic dense />
-            <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent,rgba(0,0,0,0.26))]" />
-            <span className="absolute bottom-5 right-5 font-mono text-xs text-[rgb(var(--hf-accent))]">
-              RISK WINDOWS MOVE
-            </span>
-          </motion.div>
-
-          <div className="grid grid-rows-[1fr_auto] p-10">
-            <div className="space-y-5">
-              <div className="font-mono text-xs text-[rgb(var(--hf-muted))]">FEATURED WORKFLOW</div>
-              <div className="border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel))]">
-                <div className="flex items-center gap-4 border-b border-[rgb(var(--hf-line))] p-4">
-                  <CloudRain size={28} className="text-[rgb(var(--hf-accent))]" />
-                  <div>
-                    <div className="text-sm font-semibold">Austin outdoor rain</div>
-                    <div className="text-xs text-[rgb(var(--hf-muted))]">
-                      5 candidates / 2 demo ready
-                    </div>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={onSubmit}
-                  className="flex h-12 w-full items-center justify-between px-4 text-left text-sm transition hover:bg-[rgb(var(--hf-accent))] hover:text-[rgb(var(--hf-ink))] active:translate-y-px"
-                >
-                  Map this scenario
-                  <ArrowRight size={16} weight="bold" />
-                </button>
-              </div>
-            </div>
-            <p className="border-t border-[rgb(var(--hf-line))] pt-5 text-sm leading-6 text-[rgb(var(--hf-muted))]">
-              This is not insurance. Demo execution only.
-            </p>
-          </div>
-        </motion.div>
+          <div className="border-r border-b border-[rgb(var(--hf-line))]" />
+          <div className="border-b border-[rgb(var(--hf-line))]" />
+          <div className="border-r border-[rgb(var(--hf-line))]" />
+          <div />
+        </div>
 
         <motion.div
           data-hero-vision
-          style={visionStyle}
-          className="pointer-events-none absolute inset-0 z-10 flex origin-center items-center justify-center px-10"
+          style={visionPanelStyle}
+          className="pointer-events-none absolute inset-0 z-10 bg-[rgb(var(--hf-bg))]"
+        >
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(245,198,66,0.035)_1px,transparent_1px),linear-gradient(180deg,rgba(245,198,66,0.03)_1px,transparent_1px)] bg-[size:86px_86px]" />
+          <motion.div
+            style={visionSeedStyle}
+            className="absolute right-0 top-0 flex h-[calc(100%-330px)] w-[432px] items-end border-b border-[rgb(var(--hf-line))] p-10"
+          >
+            <p className="max-w-[21ch] text-4xl font-semibold leading-[1.02] tracking-[-0.055em]">
+              We help you quickly build risk-transfer and hedge strategies with prediction-market tools.
+            </p>
+          </motion.div>
+        </motion.div>
+
+        <motion.div
+          style={visionBodyStyle}
+          className="pointer-events-none absolute inset-0 z-40 flex origin-center items-center justify-center px-10"
         >
           <div className="grid w-full max-w-[1120px] justify-items-center text-center">
             <div className="mb-7 flex justify-center gap-3">
@@ -402,6 +381,64 @@ function PinnedHero({
               <PromptBox rawText={rawText} onRawTextChange={onRawTextChange} onSubmit={onSubmit} />
             </motion.div>
           </div>
+        </motion.div>
+
+        <motion.div
+          data-hero-panels
+          style={introStyle}
+          className="absolute left-0 top-0 z-20 h-[calc(100%-330px)] w-[calc(100%-432px)] p-10"
+        >
+          <div className="flex h-full flex-col justify-end">
+            <p className="mb-6 max-w-fit bg-[rgb(var(--hf-accent))] px-2 py-1 font-mono text-xs text-[rgb(var(--hf-ink))]">
+              Prediction-market hedge discovery
+            </p>
+            <h1 className="max-w-[900px] text-[clamp(68px,7vw,116px)] font-semibold leading-[0.9] tracking-[-0.08em]">
+              AI and prediction markets for long-tail hedging.
+            </h1>
+          </div>
+        </motion.div>
+
+        <motion.div
+          aria-hidden="true"
+          style={mosaicStyle}
+          className="absolute bottom-0 left-0 z-30 h-[330px] w-[calc(100%-432px)] origin-left overflow-hidden border-r border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel))]"
+        >
+          <PixelMosaic dense />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent,rgba(0,0,0,0.26))]" />
+          <span className="absolute bottom-5 right-5 font-mono text-xs text-[rgb(var(--hf-accent))]">
+            RISK WINDOWS MOVE
+          </span>
+        </motion.div>
+
+        <motion.div
+          style={newsStyle}
+          className="absolute bottom-0 right-0 z-20 grid h-[330px] w-[432px] grid-rows-[1fr_auto] p-10"
+        >
+          <div className="space-y-5">
+            <div className="font-mono text-xs text-[rgb(var(--hf-muted))]">FEATURED WORKFLOW</div>
+            <div className="border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel))]">
+              <div className="flex items-center gap-4 border-b border-[rgb(var(--hf-line))] p-4">
+                <CloudRain size={28} className="text-[rgb(var(--hf-accent))]" />
+                <div>
+                  <div className="text-sm font-semibold">Austin outdoor rain</div>
+                  <div className="text-xs text-[rgb(var(--hf-muted))]">
+                    5 candidates / 2 demo ready
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={onSubmit}
+                className="flex h-12 w-full items-center justify-between px-4 text-left text-sm transition hover:bg-[rgb(var(--hf-accent))] hover:text-[rgb(var(--hf-ink))] active:translate-y-px"
+              >
+                Map this scenario
+                <ArrowRight size={16} weight="bold" />
+              </button>
+            </div>
+          </div>
+          <p className="border-t border-[rgb(var(--hf-line))] pt-5 text-sm leading-6 text-[rgb(var(--hf-muted))]">
+            This is not insurance. Demo execution only.
+          </p>
         </motion.div>
       </div>
     </section>

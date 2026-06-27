@@ -16,14 +16,14 @@ test("weather event user can create and execute a Kalshi demo hedge", async ({
   await expect(page.getByText("Built for exposed operators.")).toBeVisible();
   await expect(page.getByRole("button", { name: "Connect wallet" })).toBeVisible();
 
-  await page.mouse.wheel(0, 1450);
+  await page.mouse.wheel(0, 1600);
   await expect
     .poll(async () =>
       page
         .locator("[data-hero-prompt]")
         .evaluate((element) => Number(getComputedStyle(element).opacity)),
     )
-    .toBeGreaterThan(0.8);
+    .toBeGreaterThan(0.9);
   await expect(page.getByRole("button", { name: "Map markets" }).first()).toBeVisible();
   await page.evaluate(() => window.scrollTo(0, 0));
 
