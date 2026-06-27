@@ -805,6 +805,12 @@ function MatchesPanel({
                 >
                   {match.market.title}
                 </h3>
+                <div className="mt-3 inline-flex items-center gap-2 rounded-[8px] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-field))] px-2 py-1 font-mono text-xs text-[rgb(var(--hf-muted))]">
+                  <span>Direction</span>
+                  <span className="font-semibold text-[rgb(var(--hf-accent))]">
+                    Buy Yes
+                  </span>
+                </div>
                 <div className="mt-4 grid grid-cols-2 gap-2">
                   <Metric label="Ask" value={`$${match.market.bestAsk.toFixed(2)}`} />
                   <Metric label="Liquidity" value={formatMoney(match.market.liquidity)} />
@@ -857,9 +863,21 @@ function MarketDetailDialog({
             </div>
             <h2
               id="market-detail-title"
-              className="text-2xl font-semibold leading-tight tracking-[-0.03em]"
+              className="inline-flex items-start gap-3 text-2xl font-semibold leading-tight tracking-[-0.03em]"
             >
-              {match.market.title}
+              <span>{match.market.title}</span>
+              {match.market.sourceUrl ? (
+                <a
+                  href={match.market.sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Open source market"
+                  aria-label={`Open ${match.market.provider} market page for ${match.market.title}`}
+                  className="mt-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border border-[rgb(var(--hf-line))] text-[rgb(var(--hf-muted))] transition hover:border-[rgb(var(--hf-accent))] hover:text-[rgb(var(--hf-accent))] active:translate-y-px"
+                >
+                  <ArrowSquareOut size={15} weight="bold" />
+                </a>
+              ) : null}
             </h2>
           </div>
           <button
@@ -946,21 +964,13 @@ function OrderTicket({
   onConfirm: () => void;
 }) {
   const [quantity, setQuantity] = useState(String(DEFAULT_DETAIL_QUANTITY));
-  const [side, setSide] = useState<MarketSide>("yes");
-  const [action, setAction] = useState<"buy" | "sell">("buy");
+  const side: MarketSide = "yes";
+  const action = "buy";
   const parsedQuantity = Math.max(0, Math.floor(Number(quantity) || 0));
   const price = getOrderPrice(match.market, side, action);
   const cashImpact = roundCurrency(parsedQuantity * price);
-  const remainingBalance =
-    action === "buy"
-      ? roundCurrency(DETAIL_DEMO_BALANCE - cashImpact)
-      : roundCurrency(DETAIL_DEMO_BALANCE + cashImpact);
-  const balanceExceeded = action === "buy" && remainingBalance < 0;
-  const potentialLabel = action === "buy" ? "Potential payout" : "Max risk";
-  const potentialValue =
-    action === "buy"
-      ? formatMoney(parsedQuantity)
-      : formatMoneyWithCents(Math.max(0, parsedQuantity - cashImpact));
+  const remainingBalance = roundCurrency(DETAIL_DEMO_BALANCE - cashImpact);
+  const balanceExceeded = remainingBalance < 0;
 
   return (
     <aside>
@@ -976,28 +986,8 @@ function OrderTicket({
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-2">
-          <SegmentButton
-            label="Buy"
-            active={action === "buy"}
-            onClick={() => setAction("buy")}
-          />
-          <SegmentButton
-            label="Sell"
-            active={action === "sell"}
-            onClick={() => setAction("sell")}
-          />
-        </div>
-        <div className="mt-2 grid grid-cols-2 gap-2">
-          <SegmentButton
-            label={`Yes ${formatPercent(match.market.bestAsk)}`}
-            active={side === "yes"}
-            onClick={() => setSide("yes")}
-          />
-          <SegmentButton
-            label={`No ${formatPercent(1 - match.market.bestAsk)}`}
-            active={side === "no"}
-            onClick={() => setSide("no")}
-          />
+          <ReadOnlyPill label="Action" value="Buy" />
+          <ReadOnlyPill label="Outcome" value="Yes" />
         </div>
 
         <div className="mt-4 rounded-[12px] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel))] p-3">
@@ -1055,10 +1045,10 @@ function OrderTicket({
 
         <div className="mt-4 space-y-2 text-sm">
           <PreviewRow
-            label={action === "buy" ? "Estimated cost" : "Estimated proceeds"}
+            label="Estimated cost"
             value={formatMoneyWithCents(cashImpact)}
           />
-          <PreviewRow label={potentialLabel} value={potentialValue} />
+          <PreviewRow label="Potential payout" value={formatMoney(parsedQuantity)} />
           <PreviewRow label="Demo balance" value={formatMoney(DETAIL_DEMO_BALANCE)} />
           <PreviewRow
             label="Remaining"
@@ -1087,27 +1077,20 @@ function OrderTicket({
   );
 }
 
-function SegmentButton({
+function ReadOnlyPill({
   label,
-  active,
-  onClick,
+  value,
 }: {
   label: string;
-  active: boolean;
-  onClick: () => void;
+  value: string;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`h-9 rounded-[8px] border px-2 text-sm font-semibold transition active:translate-y-px ${
-        active
-          ? "border-[rgb(var(--hf-accent))] bg-[rgb(var(--hf-accent))] text-[rgb(var(--hf-ink))]"
-          : "border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel))] text-[rgb(var(--hf-muted))] hover:text-[rgb(var(--hf-text))]"
-      }`}
-    >
-      {label}
-    </button>
+    <div className="rounded-[8px] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel))] px-3 py-2">
+      <div className="font-mono text-[10px] text-[rgb(var(--hf-muted))]">{label}</div>
+      <div className="mt-1 text-sm font-semibold text-[rgb(var(--hf-accent))]">
+        {value}
+      </div>
+    </div>
   );
 }
 

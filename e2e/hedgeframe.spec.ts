@@ -70,21 +70,30 @@ test("weather event user can create and execute a Kalshi demo hedge", async ({
   await expect(page.locator("[data-market-card-title]").first()).toContainText(
     "Will Austin record heavy rain",
   );
+  await expect(page.getByText("Direction").first()).toBeVisible();
+  await expect(page.getByText("Buy Yes").first()).toBeVisible();
   await page.locator("[data-market-card-title]").first().click();
   const marketDialog = page.getByRole("dialog", {
     name: "Will Austin record heavy rain on Oct 12, 2026?",
   });
   await expect(marketDialog).toBeVisible();
+  await expect(
+    marketDialog.getByRole("link", {
+      name: /Open kalshi market page for Will Austin record heavy rain/,
+    }),
+  ).toHaveAttribute("target", "_blank");
   await expect(page.getByRole("img", { name: /Probability trend for Will Austin record heavy rain/ })).toBeVisible();
   await expect(marketDialog.getByText("YES", { exact: true })).toBeVisible();
   await expect(marketDialog.getByText("NO", { exact: true })).toBeVisible();
   await expect(page.getByText("Rules and market background")).toBeVisible();
   await expect(marketDialog.getByRole("button", { name: "展开" })).toBeVisible();
   await expect(marketDialog.getByText("Order ticket")).toBeVisible();
-  await expect(marketDialog.getByRole("button", { name: "Buy" })).toBeVisible();
-  await expect(marketDialog.getByRole("button", { name: "Sell" })).toBeVisible();
-  await expect(marketDialog.getByRole("button", { name: /Yes 32%/ })).toBeVisible();
-  await expect(marketDialog.getByRole("button", { name: /No 68%/ })).toBeVisible();
+  await expect(marketDialog.getByText("Action")).toBeVisible();
+  await expect(marketDialog.getByText("Outcome")).toBeVisible();
+  await expect(marketDialog.getByText("Buy", { exact: true })).toBeVisible();
+  await expect(marketDialog.getByText("Yes", { exact: true })).toBeVisible();
+  await expect(marketDialog.getByRole("button", { name: "Sell" })).toHaveCount(0);
+  await expect(marketDialog.getByRole("button", { name: /No 68%/ })).toHaveCount(0);
   await expect(marketDialog.getByLabel("Quantity")).toHaveValue("100");
   await marketDialog.getByRole("button", { name: "250" }).click();
   await expect(marketDialog.getByLabel("Quantity")).toHaveValue("250");
