@@ -299,10 +299,11 @@ function PinnedHero({
     [0, 1040],
     ["inset(0% 0% 32% 70%)", "inset(0% 0% 0% 0%)"],
   );
-  const visionSeedOpacity = useTransform(scrollY, [0, 720], [1, 0]);
-  const visionBodyOpacity = useTransform(scrollY, [650, 1040], [0, 1]);
-  const visionBodyY = useTransform(scrollY, [650, 1040], [64, 0]);
-  const visionBodyScale = useTransform(scrollY, [650, 1040], [0.84, 1]);
+  const visionTextLeft = useTransform(scrollY, [0, 1040], ["72.8%", "13.2%"]);
+  const visionTextTop = useTransform(scrollY, [0, 1040], ["50%", "27.8%"]);
+  const visionTextWidth = useTransform(scrollY, [0, 1040], ["43%", "73.6%"]);
+  const visionTextScale = useTransform(scrollY, [0, 1040], [0.58, 1]);
+  const visionBadgesOpacity = useTransform(scrollY, [520, 900], [0, 1]);
   const promptOpacity = useTransform(scrollY, [1180, 1520], [0, 1]);
   const promptY = useTransform(scrollY, [1180, 1520], [38, 0]);
 
@@ -318,10 +319,15 @@ function PinnedHero({
         y: mosaicY,
       };
   const visionPanelStyle = reduce ? { clipPath: "inset(0% 0% 0% 0%)" } : { clipPath: visionClipPath };
-  const visionSeedStyle = reduce ? { opacity: 0 } : { opacity: visionSeedOpacity };
-  const visionBodyStyle = reduce
-    ? { opacity: 1 }
-    : { opacity: visionBodyOpacity, y: visionBodyY, scale: visionBodyScale };
+  const visionTextStyle = reduce
+    ? { left: "190px", top: "290px", width: "1060px", opacity: 1 }
+    : {
+        left: visionTextLeft,
+        top: visionTextTop,
+        width: visionTextWidth,
+        scale: visionTextScale,
+      };
+  const visionBadgesStyle = reduce ? { opacity: 1 } : { opacity: visionBadgesOpacity };
   const promptStyle = reduce ? { opacity: 1 } : { opacity: promptOpacity, y: promptY };
 
   return (
@@ -348,22 +354,14 @@ function PinnedHero({
           className="pointer-events-none absolute inset-0 z-10 bg-[rgb(var(--hf-panel))]"
         >
           <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(245,198,66,0.06)_1px,transparent_1px),linear-gradient(180deg,rgba(245,198,66,0.045)_1px,transparent_1px)] bg-[size:86px_86px]" />
-          <motion.div
-            style={visionSeedStyle}
-            className="absolute right-0 top-0 flex h-[calc(100%-330px)] w-[432px] items-end border-b border-[rgb(var(--hf-line))] p-10"
-          >
-            <p className="max-w-[21ch] text-4xl font-semibold leading-[1.02] tracking-[-0.055em]">
-              {visionLine}
-            </p>
-          </motion.div>
         </motion.div>
 
         <motion.div
-          style={visionBodyStyle}
-          className="pointer-events-none absolute inset-0 z-40 flex origin-center items-center justify-center px-10"
+          style={visionTextStyle}
+          className="pointer-events-none absolute z-40 origin-top-left text-center"
         >
-          <div className="grid w-full max-w-[1120px] justify-items-center text-center">
-            <div className="mb-7 flex justify-center gap-3">
+          <div className="grid justify-items-center">
+            <motion.div style={visionBadgesStyle} className="mb-7 flex justify-center gap-3">
               {["AI PARSE", "MARKET FIT", "AUDIT"].map((item) => (
                 <span
                   key={item}
@@ -372,8 +370,8 @@ function PinnedHero({
                   {item}
                 </span>
               ))}
-            </div>
-            <h2 className="max-w-[1060px] text-[clamp(48px,5.4vw,86px)] font-semibold leading-[0.94] tracking-[-0.075em]">
+            </motion.div>
+            <h2 className="text-[clamp(48px,5.4vw,86px)] font-semibold leading-[0.94] tracking-[-0.075em]">
               {visionLine}
             </h2>
             <motion.div
