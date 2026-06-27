@@ -15,12 +15,12 @@ describe("HomePage", () => {
 
     expect(
       screen.getByRole("heading", {
-        name: "AI and prediction markets for long-tail hedging.",
+        name: "AI and prediction markets based hedging tool.",
       }),
     ).toBeInTheDocument();
     expect(
       screen.getAllByText(
-        "We help you quickly build risk-transfer and hedge strategies with prediction-market tools.",
+        "Build hedges faster with prediction-market tools.",
       ).length,
     ).toBeGreaterThan(0);
     expect(screen.getAllByRole("button", { name: "Map markets" }).length).toBeGreaterThan(0);

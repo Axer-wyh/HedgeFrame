@@ -8,7 +8,7 @@ test("weather event user can create and execute a Kalshi demo hedge", async ({
 
   await expect(
     page.getByRole("heading", {
-      name: "AI and prediction markets for long-tail hedging.",
+      name: "AI and prediction markets based hedging tool.",
     }),
   ).toBeVisible();
   await expect(page.getByRole("button", { name: /Markets/ })).toBeVisible();

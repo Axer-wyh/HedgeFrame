@@ -29,6 +29,9 @@ import { DecryptedText, Reveal } from "./motion-primitives";
 const sampleScenario =
   "My outdoor event loses $80k if heavy rain hits Austin on Oct 12.";
 
+const heroTitle = "AI and prediction markets based hedging tool.";
+const visionLine = "Build hedges faster with prediction-market tools.";
+
 const marketMenu = [
   ["Weather events", "Rain, snow, heat, wind, and event-window exposure."],
   ["Venue revenue", "Cancellation, access, and footfall-sensitive losses."],
@@ -342,15 +345,15 @@ function PinnedHero({
         <motion.div
           data-hero-vision
           style={visionPanelStyle}
-          className="pointer-events-none absolute inset-0 z-10 bg-[rgb(var(--hf-bg))]"
+          className="pointer-events-none absolute inset-0 z-10 bg-[rgb(var(--hf-panel))]"
         >
-          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(245,198,66,0.035)_1px,transparent_1px),linear-gradient(180deg,rgba(245,198,66,0.03)_1px,transparent_1px)] bg-[size:86px_86px]" />
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(245,198,66,0.06)_1px,transparent_1px),linear-gradient(180deg,rgba(245,198,66,0.045)_1px,transparent_1px)] bg-[size:86px_86px]" />
           <motion.div
             style={visionSeedStyle}
             className="absolute right-0 top-0 flex h-[calc(100%-330px)] w-[432px] items-end border-b border-[rgb(var(--hf-line))] p-10"
           >
             <p className="max-w-[21ch] text-4xl font-semibold leading-[1.02] tracking-[-0.055em]">
-              We help you quickly build risk-transfer and hedge strategies with prediction-market tools.
+              {visionLine}
             </p>
           </motion.div>
         </motion.div>
@@ -371,7 +374,7 @@ function PinnedHero({
               ))}
             </div>
             <h2 className="max-w-[1060px] text-[clamp(48px,5.4vw,86px)] font-semibold leading-[0.94] tracking-[-0.075em]">
-              We help you quickly build risk-transfer and hedge strategies with prediction-market tools.
+              {visionLine}
             </h2>
             <motion.div
               data-hero-prompt
@@ -393,7 +396,7 @@ function PinnedHero({
               Prediction-market hedge discovery
             </p>
             <h1 className="max-w-[900px] text-[clamp(68px,7vw,116px)] font-semibold leading-[0.9] tracking-[-0.08em]">
-              AI and prediction markets for long-tail hedging.
+              {heroTitle}
             </h1>
           </div>
         </motion.div>
