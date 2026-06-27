@@ -28,6 +28,7 @@ import type {
 
 type ApiState = "idle" | "loading" | "ready" | "error";
 type MarketFilter = "all" | "kalshi" | "polymarket" | "blocked";
+type MarketSort = "default" | "liquidity" | "relevance" | "timeliness";
 
 const fallbackScenario =
   "My outdoor event loses $80k if heavy rain hits Austin on Oct 12.";
@@ -46,6 +47,7 @@ export function MarketsWorkspace({ initialScenario }: { initialScenario?: string
   const [statusText, setStatusText] = useState("Ready to map markets");
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<MarketFilter>("all");
+  const [sort, setSort] = useState<MarketSort>("default");
   const [identityPanel, setIdentityPanel] = useState<IdentityPanelMode | null>(null);
   const hasAutoRun = useRef(false);
 
@@ -68,6 +70,33 @@ export function MarketsWorkspace({ initialScenario }: { initialScenario?: string
 
     return matches;
   }, [filter, matches]);
+  const sortedMatches = useMemo(() => {
+    if (sort === "default") return filteredMatches;
+
+    return filteredMatches
+      .map((match, index) => ({ match, index }))
+      .sort((a, b) => {
+        if (sort === "liquidity") {
+          return (
+            b.match.market.liquidity - a.match.market.liquidity ||
+            b.match.score - a.match.score ||
+            a.index - b.index
+          );
+        }
+
+        if (sort === "timeliness") {
+          return (
+            Date.parse(a.match.market.closeTime) -
+              Date.parse(b.match.market.closeTime) ||
+            b.match.score - a.match.score ||
+            a.index - b.index
+          );
+        }
+
+        return b.match.score - a.match.score || a.index - b.index;
+      })
+      .map(({ match }) => match);
+  }, [filteredMatches, sort]);
 
   async function findHedgePaths(nextRawText = rawText) {
     setStatus("loading");
@@ -273,9 +302,26 @@ export function MarketsWorkspace({ initialScenario }: { initialScenario?: string
                     Filter by venue, review basis risk, then choose demo-eligible legs.
                   </p>
                 </div>
-                <div className="flex items-center gap-2 font-mono text-xs text-[rgb(var(--hf-muted))]">
-                  <Database size={14} />
-                  mock provider catalog
+                <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                  <div className="flex items-center gap-2 font-mono text-xs text-[rgb(var(--hf-muted))]">
+                    <Database size={14} />
+                    mock provider catalog
+                  </div>
+                  <label className="flex h-9 items-center gap-2 rounded-[8px] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel-strong))] px-3 font-mono text-xs text-[rgb(var(--hf-muted))]">
+                    <Funnel size={14} />
+                    <span>Sort</span>
+                    <select
+                      value={sort}
+                      onChange={(event) => setSort(event.target.value as MarketSort)}
+                      aria-label="Sort candidates"
+                      className="bg-transparent text-[rgb(var(--hf-text))] outline-none"
+                    >
+                      <option value="default">Default</option>
+                      <option value="liquidity">Liquidity</option>
+                      <option value="relevance">Relevance</option>
+                      <option value="timeliness">Timeliness</option>
+                    </select>
+                  </label>
                 </div>
               </div>
               <AnimatedTabs
@@ -290,7 +336,7 @@ export function MarketsWorkspace({ initialScenario }: { initialScenario?: string
               />
             </Reveal>
             <MatchesPanel
-              matches={filteredMatches}
+              matches={sortedMatches}
               selectedMarketIds={selectedMarketIds}
               loading={status === "loading" && matches.length === 0}
               onToggleMarket={(marketId) => {
@@ -532,7 +578,10 @@ function MatchesPanel({
               >
                 <div className="grid gap-4 xl:grid-cols-[1fr_130px]">
                   <div>
-                    <h3 className="text-lg font-semibold tracking-[-0.015em]">
+                    <h3
+                      data-market-card-title
+                      className="text-lg font-semibold tracking-[-0.015em]"
+                    >
                       {match.market.title}
                     </h3>
                     <p className="mt-2 line-clamp-2 text-sm leading-6 text-[rgb(var(--hf-muted))]">
