@@ -29,7 +29,7 @@ describe("HedgeFrame domain flow", () => {
 
     const matches = rankMarketsForScenario(scenario, mockMarkets);
 
-    expect(matches).toHaveLength(5);
+    expect(matches).toHaveLength(15);
     expect(matches[0].market.riskType).toBe("weather_event");
     expect(matches[0].score).toBeGreaterThan(80);
     expect(matches[0].covered).toContain("Weather trigger");

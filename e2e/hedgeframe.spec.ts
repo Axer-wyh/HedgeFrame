@@ -41,6 +41,11 @@ test("weather event user can create and execute a Kalshi demo hedge", async ({
     "https://kalshi.com/markets/KXRAIN-AUS-2026OCT12",
   );
   await expect(sourceMarketLink).toHaveAttribute("target", "_blank");
+  await expect(page.locator("[data-market-card-title]")).toHaveCount(15);
+  await expect(page.getByText("Showing 1-15 of 15")).toBeVisible();
+  await expect(page.getByText("30 per page")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Previous page" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Next page" })).toBeDisabled();
   const filterWidths = await Promise.all(
     ["All", "Kalshi demo", "Polymarket", "Others"].map(async (name) => {
       const box = await page.getByRole("button", { name, exact: true }).boundingBox();

@@ -32,6 +32,8 @@ type ApiState = "idle" | "loading" | "ready" | "error";
 type MarketFilter = "all" | "kalshi" | "polymarket" | "blocked";
 type MarketSort = "default" | "liquidity" | "relevance" | "timeliness";
 
+const MATCHES_PER_PAGE = 30;
+
 const fallbackScenario =
   "My outdoor event loses $80k if heavy rain hits Austin on Oct 12.";
 
@@ -61,6 +63,7 @@ export function MarketsWorkspace({ initialScenario }: { initialScenario?: string
   const [detailMatch, setDetailMatch] = useState<MatchResult | null>(null);
   const [planOpen, setPlanOpen] = useState(false);
   const [identityPanel, setIdentityPanel] = useState<IdentityPanelMode | null>(null);
+  const [page, setPage] = useState(1);
   const hasAutoRun = useRef(false);
 
   const executableMatches = useMemo(
@@ -109,6 +112,12 @@ export function MarketsWorkspace({ initialScenario }: { initialScenario?: string
       })
       .map(({ match }) => match);
   }, [filteredMatches, sort]);
+  const pageCount = Math.max(1, Math.ceil(sortedMatches.length / MATCHES_PER_PAGE));
+  const currentPage = Math.min(page, pageCount);
+  const paginatedMatches = useMemo(() => {
+    const start = (currentPage - 1) * MATCHES_PER_PAGE;
+    return sortedMatches.slice(start, start + MATCHES_PER_PAGE);
+  }, [currentPage, sortedMatches]);
 
   async function findHedgePaths(nextRawText = rawText) {
     setStatus("loading");
@@ -161,6 +170,7 @@ export function MarketsWorkspace({ initialScenario }: { initialScenario?: string
           .slice(0, 1)
           .map((match) => match.market.id),
       );
+      setPage(1);
       setStatus("ready");
       setStatusText("Markets ranked");
     } catch (requestError) {
@@ -323,13 +333,19 @@ export function MarketsWorkspace({ initialScenario }: { initialScenario?: string
                     value={sort}
                     open={sortOpen}
                     onOpenChange={setSortOpen}
-                    onChange={setSort}
+                    onChange={(nextSort) => {
+                      setSort(nextSort);
+                      setPage(1);
+                    }}
                   />
                 </div>
               </div>
               <AnimatedTabs
                 value={filter}
-                onChange={setFilter}
+                onChange={(nextFilter) => {
+                  setFilter(nextFilter);
+                  setPage(1);
+                }}
                 tabs={[
                   { label: "All", value: "all" },
                   { label: "Kalshi demo", value: "kalshi" },
@@ -339,7 +355,7 @@ export function MarketsWorkspace({ initialScenario }: { initialScenario?: string
               />
             </Reveal>
             <MatchesPanel
-              matches={sortedMatches}
+              matches={paginatedMatches}
               selectedMarketIds={selectedMarketIds}
               loading={status === "loading" && matches.length === 0}
               onOpenDetails={setDetailMatch}
@@ -351,6 +367,15 @@ export function MarketsWorkspace({ initialScenario }: { initialScenario?: string
                 );
               }}
             />
+            {sortedMatches.length > 0 ? (
+              <PaginationBar
+                totalCount={sortedMatches.length}
+                pageSize={MATCHES_PER_PAGE}
+                currentPage={currentPage}
+                pageCount={pageCount}
+                onPageChange={setPage}
+              />
+            ) : null}
           </section>
 
         </section>
@@ -607,6 +632,62 @@ function StatusPanel({
         </div>
       ) : null}
     </section>
+  );
+}
+
+function PaginationBar({
+  totalCount,
+  pageSize,
+  currentPage,
+  pageCount,
+  onPageChange,
+}: {
+  totalCount: number;
+  pageSize: number;
+  currentPage: number;
+  pageCount: number;
+  onPageChange: (page: number) => void;
+}) {
+  const start = totalCount === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+  const end = Math.min(currentPage * pageSize, totalCount);
+
+  return (
+    <nav
+      aria-label="Candidate pagination"
+      className="flex flex-wrap items-center justify-between gap-3 rounded-[16px] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel))] px-4 py-3"
+    >
+      <div className="flex flex-wrap items-center gap-3 font-mono text-xs text-[rgb(var(--hf-muted))]">
+        <span>
+          Showing {start}-{end} of {totalCount}
+        </span>
+        <span className="rounded-[8px] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-field))] px-2 py-1 text-[rgb(var(--hf-text))]">
+          {pageSize} per page
+        </span>
+      </div>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          aria-label="Previous page"
+          onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+          disabled={currentPage <= 1}
+          className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-[rgb(var(--hf-line))] text-[rgb(var(--hf-muted))] transition hover:border-[rgb(var(--hf-line-strong))] hover:text-[rgb(var(--hf-text))] active:translate-y-px disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:border-[rgb(var(--hf-line))] disabled:hover:text-[rgb(var(--hf-muted))]"
+        >
+          <ArrowLeft size={15} weight="bold" />
+        </button>
+        <span className="min-w-24 text-center font-mono text-xs text-[rgb(var(--hf-muted))]">
+          Page {currentPage} of {pageCount}
+        </span>
+        <button
+          type="button"
+          aria-label="Next page"
+          onClick={() => onPageChange(Math.min(pageCount, currentPage + 1))}
+          disabled={currentPage >= pageCount}
+          className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-[rgb(var(--hf-line))] text-[rgb(var(--hf-muted))] transition hover:border-[rgb(var(--hf-line-strong))] hover:text-[rgb(var(--hf-text))] active:translate-y-px disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:border-[rgb(var(--hf-line))] disabled:hover:text-[rgb(var(--hf-muted))]"
+        >
+          <ArrowRight size={15} weight="bold" />
+        </button>
+      </div>
+    </nav>
   );
 }
 

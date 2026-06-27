@@ -55,7 +55,7 @@ describe("Prisma repository", () => {
 
     expect(execution.status).toBe("filled");
     expect(await prisma.riskScenario.count()).toBe(1);
-    expect(await prisma.matchResult.count()).toBe(5);
+    expect(await prisma.matchResult.count()).toBe(15);
     expect(await prisma.hedgePlan.count()).toBe(1);
     expect(await prisma.orderExecution.count()).toBe(1);
     expect(await prisma.auditLog.count()).toBe(4);

@@ -1,5 +1,7 @@
 import type { MarketCandidate, MatchResult, RiskScenario } from "./types";
 
+const MAX_MATCH_RESULTS = 30;
+
 export function rankMarketsForScenario(
   scenario: RiskScenario,
   markets: MarketCandidate[],
@@ -7,7 +9,7 @@ export function rankMarketsForScenario(
   return markets
     .map((market) => scoreMarket(scenario, market))
     .sort((a, b) => b.score - a.score)
-    .slice(0, 5);
+    .slice(0, MAX_MATCH_RESULTS);
 }
 
 function scoreMarket(
