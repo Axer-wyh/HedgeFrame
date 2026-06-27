@@ -625,11 +625,11 @@ function MatchesPanel({
 }) {
   if (loading) {
     return (
-      <section className="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
+      <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
         {[0, 1, 2, 3, 4, 5].map((item) => (
           <div
             key={item}
-            className="h-52 animate-pulse rounded-[16px] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel))]"
+            className="h-44 animate-pulse rounded-[16px] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel))]"
           />
         ))}
       </section>
@@ -648,13 +648,13 @@ function MatchesPanel({
   }
 
   return (
-    <section className="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
+    <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
       {matches.map((match, index) => {
         const selected = selectedMarketIds.includes(match.market.id);
         return (
           <Reveal key={match.market.id} delay={index * 0.03}>
             <div
-              className={`flex min-h-64 flex-col rounded-[16px] border p-4 transition ${
+              className={`flex min-h-44 flex-col rounded-[16px] border p-3 transition ${
                 selected
                   ? "border-[rgb(var(--hf-accent))]/75 bg-[rgb(var(--hf-accent))]/10"
                   : "border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel))] hover:border-[rgb(var(--hf-line-strong))]"
@@ -686,22 +686,14 @@ function MatchesPanel({
               >
                 <h3
                   data-market-card-title
-                  className="text-lg font-semibold leading-snug tracking-[-0.015em]"
+                  className="line-clamp-2 text-base font-semibold leading-snug tracking-[-0.015em]"
                 >
                   {match.market.title}
                 </h3>
-                <p className="mt-2 line-clamp-3 text-sm leading-6 text-[rgb(var(--hf-muted))]">
-                  {match.market.rules}
-                </p>
-                <div className="mt-4 grid grid-cols-3 gap-2">
-                  <Metric label="Score" value={String(Math.round(match.score))} />
+                <div className="mt-4 grid grid-cols-2 gap-2">
                   <Metric label="Ask" value={`$${match.market.bestAsk.toFixed(2)}`} />
                   <Metric label="Liquidity" value={formatMoney(match.market.liquidity)} />
                 </div>
-                <p className="mt-3 line-clamp-2 text-sm leading-6 text-[rgb(var(--hf-muted))]">
-                  <span className="text-[rgb(var(--hf-text))]">Covers:</span>{" "}
-                  {match.covered.join(", ")}
-                </p>
               </button>
               <button
                 type="button"
