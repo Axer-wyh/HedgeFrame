@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   ArrowRight,
   ArrowSquareOut,
+  CaretDown,
   CheckCircle,
   Clock,
   Database,
@@ -34,6 +35,13 @@ type MarketSort = "default" | "liquidity" | "relevance" | "timeliness";
 const fallbackScenario =
   "My outdoor event loses $80k if heavy rain hits Austin on Oct 12.";
 
+const sortOptions: { label: string; value: MarketSort }[] = [
+  { label: "Default", value: "default" },
+  { label: "Liquidity", value: "liquidity" },
+  { label: "Relevance", value: "relevance" },
+  { label: "Timeliness", value: "timeliness" },
+];
+
 export function MarketsWorkspace({ initialScenario }: { initialScenario?: string }) {
   const [rawText, setRawText] = useState(initialScenario || fallbackScenario);
   const [scenario, setScenario] = useState<(RiskScenario & { id?: string }) | null>(
@@ -49,6 +57,7 @@ export function MarketsWorkspace({ initialScenario }: { initialScenario?: string
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<MarketFilter>("all");
   const [sort, setSort] = useState<MarketSort>("default");
+  const [sortOpen, setSortOpen] = useState(false);
   const [detailMatch, setDetailMatch] = useState<MatchResult | null>(null);
   const [planOpen, setPlanOpen] = useState(false);
   const [identityPanel, setIdentityPanel] = useState<IdentityPanelMode | null>(null);
@@ -310,21 +319,12 @@ export function MarketsWorkspace({ initialScenario }: { initialScenario?: string
                     <Database size={14} />
                     mock provider catalog
                   </div>
-                  <label className="flex h-9 items-center gap-2 rounded-[8px] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel-strong))] px-3 font-mono text-xs text-[rgb(var(--hf-muted))]">
-                    <Funnel size={14} />
-                    <span>Sort</span>
-                    <select
-                      value={sort}
-                      onChange={(event) => setSort(event.target.value as MarketSort)}
-                      aria-label="Sort candidates"
-                      className="bg-transparent text-[rgb(var(--hf-text))] outline-none"
-                    >
-                      <option value="default">Default</option>
-                      <option value="liquidity">Liquidity</option>
-                      <option value="relevance">Relevance</option>
-                      <option value="timeliness">Timeliness</option>
-                    </select>
-                  </label>
+                  <SortMenu
+                    value={sort}
+                    open={sortOpen}
+                    onOpenChange={setSortOpen}
+                    onChange={setSort}
+                  />
                 </div>
               </div>
               <AnimatedTabs
@@ -401,6 +401,78 @@ export function MarketsWorkspace({ initialScenario }: { initialScenario?: string
         : [...current, marketId],
     );
   }
+}
+
+function SortMenu({
+  value,
+  open,
+  onOpenChange,
+  onChange,
+}: {
+  value: MarketSort;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onChange: (value: MarketSort) => void;
+}) {
+  const current = sortOptions.find((option) => option.value === value) ?? sortOptions[0];
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-label={`Sort candidates: ${current.label}`}
+        onClick={() => onOpenChange(!open)}
+        className="inline-flex h-9 min-w-40 items-center justify-between gap-2 rounded-[8px] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel-strong))] px-3 font-mono text-xs text-[rgb(var(--hf-muted))] transition hover:border-[rgb(var(--hf-line-strong))] hover:text-[rgb(var(--hf-text))] active:translate-y-px"
+      >
+        <span className="inline-flex items-center gap-2">
+          <Funnel size={14} />
+          <span>Sort</span>
+        </span>
+        <span className="inline-flex items-center gap-1 text-[rgb(var(--hf-text))]">
+          {current.label}
+          <CaretDown
+            size={12}
+            weight="bold"
+            className={`transition ${open ? "rotate-180" : ""}`}
+          />
+        </span>
+      </button>
+      {open ? (
+        <div
+          role="listbox"
+          aria-label="Sort candidates"
+          className="absolute right-0 top-11 z-50 w-44 overflow-hidden rounded-[10px] border border-[rgb(var(--hf-line-strong))] bg-[rgb(var(--hf-panel-strong))] p-1 shadow-[0_18px_60px_rgba(0,0,0,0.42)]"
+        >
+          {sortOptions.map((option) => {
+            const active = option.value === value;
+
+            return (
+              <button
+                key={option.value}
+                type="button"
+                role="option"
+                aria-selected={active}
+                onClick={() => {
+                  onChange(option.value);
+                  onOpenChange(false);
+                }}
+                className={`flex h-9 w-full items-center justify-between rounded-[8px] px-3 text-left font-mono text-xs transition active:translate-y-px ${
+                  active
+                    ? "bg-[rgb(var(--hf-accent))] text-[rgb(var(--hf-ink))]"
+                    : "text-[rgb(var(--hf-muted))] hover:bg-[rgb(var(--hf-field))] hover:text-[rgb(var(--hf-text))]"
+                }`}
+              >
+                {option.label}
+                {active ? <CheckCircle size={14} weight="bold" /> : null}
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 function ScenarioPanel({

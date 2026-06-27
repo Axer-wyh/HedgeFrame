@@ -48,13 +48,15 @@ test("weather event user can create and execute a Kalshi demo hedge", async ({
     }),
   );
   expect(filterWidths.every((width) => Math.abs(width - filterWidths[0]) <= 1)).toBe(true);
-  const sortSelect = page.getByLabel("Sort candidates");
-  await expect(sortSelect).toHaveValue("default");
-  await sortSelect.selectOption("liquidity");
+  const sortButton = page.getByRole("button", { name: /Sort candidates/ });
+  await expect(sortButton).toContainText("Default");
+  await sortButton.click();
+  await page.getByRole("option", { name: "Liquidity" }).click();
   await expect(page.locator("[data-market-card-title]").first()).toContainText(
     "Will US CPI exceed 3 percent",
   );
-  await sortSelect.selectOption("relevance");
+  await sortButton.click();
+  await page.getByRole("option", { name: "Relevance" }).click();
   await expect(page.locator("[data-market-card-title]").first()).toContainText(
     "Will Austin record heavy rain",
   );
