@@ -285,7 +285,7 @@ export function MarketsWorkspace({ initialScenario }: { initialScenario?: string
                   { label: "All", value: "all" },
                   { label: "Kalshi demo", value: "kalshi" },
                   { label: "Polymarket", value: "polymarket" },
-                  { label: "Blocked", value: "blocked" },
+                  { label: "Others", value: "blocked" },
                 ]}
               />
             </Reveal>

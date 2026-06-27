@@ -42,7 +42,7 @@ test("weather event user can create and execute a Kalshi demo hedge", async ({
   );
   await expect(sourceMarketLink).toHaveAttribute("target", "_blank");
   const filterWidths = await Promise.all(
-    ["All", "Kalshi demo", "Polymarket", "Blocked"].map(async (name) => {
+    ["All", "Kalshi demo", "Polymarket", "Others"].map(async (name) => {
       const box = await page.getByRole("button", { name, exact: true }).boundingBox();
       return Math.round(box?.width ?? 0);
     }),
