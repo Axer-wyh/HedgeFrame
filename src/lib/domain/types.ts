@@ -29,6 +29,7 @@ export type RiskScenario = {
 export type MarketCandidate = {
   provider: Provider;
   id: string;
+  sourceUrl?: string;
   title: string;
   rules: string;
   riskType: RiskType;

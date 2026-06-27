@@ -3,6 +3,7 @@
 import {
   ArrowLeft,
   ArrowRight,
+  ArrowSquareOut,
   CheckCircle,
   Clock,
   Database,
@@ -498,46 +499,64 @@ function MatchesPanel({
         const selected = selectedMarketIds.includes(match.market.id);
         return (
           <Reveal key={match.market.id} delay={index * 0.03}>
-            <button
-              type="button"
-              onClick={() => onToggleMarket(match.market.id)}
-              className={`w-full rounded-[16px] border p-4 text-left transition active:translate-y-px ${
+            <div
+              className={`rounded-[16px] border p-4 transition ${
                 selected
                   ? "border-[rgb(var(--hf-accent))]/75 bg-[rgb(var(--hf-accent))]/10"
                   : "border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel))] hover:border-[rgb(var(--hf-line-strong))]"
               }`}
             >
-              <div className="grid gap-4 xl:grid-cols-[1fr_130px]">
-                <div>
-                  <div className="mb-3 flex flex-wrap gap-2">
-                    <Badge>{match.market.provider}</Badge>
-                    <Badge>{match.confidence} confidence</Badge>
-                    <Badge>{match.executionAllowed ? "demo ready" : "blocked"}</Badge>
+              <div className="mb-3 flex items-start justify-between gap-3">
+                <div className="flex flex-wrap gap-2">
+                  <Badge>{match.market.provider}</Badge>
+                  <Badge>{match.confidence} confidence</Badge>
+                  <Badge>{match.executionAllowed ? "demo ready" : "blocked"}</Badge>
+                </div>
+                {match.market.sourceUrl ? (
+                  <a
+                    href={match.market.sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Open source market"
+                    aria-label={`Open ${match.market.provider} market page for ${match.market.title}`}
+                    className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border border-[rgb(var(--hf-line))] text-[rgb(var(--hf-muted))] transition hover:border-[rgb(var(--hf-accent))] hover:text-[rgb(var(--hf-accent))] active:translate-y-px"
+                  >
+                    <ArrowSquareOut size={15} weight="bold" />
+                  </a>
+                ) : null}
+              </div>
+              <button
+                type="button"
+                onClick={() => onToggleMarket(match.market.id)}
+                className="block w-full text-left transition active:translate-y-px"
+              >
+                <div className="grid gap-4 xl:grid-cols-[1fr_130px]">
+                  <div>
+                    <h3 className="text-lg font-semibold tracking-[-0.015em]">
+                      {match.market.title}
+                    </h3>
+                    <p className="mt-2 line-clamp-2 text-sm leading-6 text-[rgb(var(--hf-muted))]">
+                      {match.market.rules}
+                    </p>
                   </div>
-                  <h3 className="text-lg font-semibold tracking-[-0.015em]">
-                    {match.market.title}
-                  </h3>
-                  <p className="mt-2 line-clamp-2 text-sm leading-6 text-[rgb(var(--hf-muted))]">
-                    {match.market.rules}
+                  <div className="grid grid-cols-3 gap-2 xl:grid-cols-1">
+                    <Metric label="Score" value={String(Math.round(match.score))} />
+                    <Metric label="Ask" value={`$${match.market.bestAsk.toFixed(2)}`} />
+                    <Metric label="Liquidity" value={formatMoney(match.market.liquidity)} />
+                  </div>
+                </div>
+                <div className="mt-4 grid gap-3 text-sm leading-6 text-[rgb(var(--hf-muted))] md:grid-cols-2">
+                  <p>
+                    <span className="text-[rgb(var(--hf-text))]">Covers:</span>{" "}
+                    {match.covered.join(", ")}
+                  </p>
+                  <p>
+                    <span className="text-[rgb(var(--hf-text))]">Does not cover:</span>{" "}
+                    {match.notCovered.join(", ")}
                   </p>
                 </div>
-                <div className="grid grid-cols-3 gap-2 xl:grid-cols-1">
-                  <Metric label="Score" value={String(Math.round(match.score))} />
-                  <Metric label="Ask" value={`$${match.market.bestAsk.toFixed(2)}`} />
-                  <Metric label="Liquidity" value={formatMoney(match.market.liquidity)} />
-                </div>
-              </div>
-              <div className="mt-4 grid gap-3 text-sm leading-6 text-[rgb(var(--hf-muted))] md:grid-cols-2">
-                <p>
-                  <span className="text-[rgb(var(--hf-text))]">Covers:</span>{" "}
-                  {match.covered.join(", ")}
-                </p>
-                <p>
-                  <span className="text-[rgb(var(--hf-text))]">Does not cover:</span>{" "}
-                  {match.notCovered.join(", ")}
-                </p>
-              </div>
-            </button>
+              </button>
+            </div>
           </Reveal>
         );
       })}

@@ -77,7 +77,10 @@ export function AnimatedTabs<Tab extends string>({
 }) {
   return (
     <LayoutGroup>
-      <div className="flex w-full flex-wrap gap-2 rounded-[12px] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel))]/70 p-1">
+      <div
+        className="grid w-full gap-2 rounded-[12px] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel))]/70 p-1"
+        style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}
+      >
         {tabs.map((tab) => {
           const active = tab.value === value;
           return (
@@ -85,7 +88,7 @@ export function AnimatedTabs<Tab extends string>({
               key={tab.value}
               type="button"
               onClick={() => onChange(tab.value)}
-              className={`relative h-9 rounded-[8px] px-3 text-sm transition active:translate-y-px ${
+              className={`relative h-9 min-w-0 rounded-[8px] px-3 text-sm transition active:translate-y-px ${
                 active
                   ? "text-[rgb(var(--hf-ink))]"
                   : "text-[rgb(var(--hf-muted))] hover:text-[rgb(var(--hf-text))]"
@@ -98,7 +101,7 @@ export function AnimatedTabs<Tab extends string>({
                   transition={{ type: "spring", stiffness: 420, damping: 34 }}
                 />
               ) : null}
-              <span className="relative z-10">{tab.label}</span>
+              <span className="relative z-10 block truncate">{tab.label}</span>
             </button>
           );
         })}

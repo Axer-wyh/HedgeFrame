@@ -4,6 +4,7 @@ export const mockMarkets: MarketCandidate[] = [
   {
     provider: "kalshi",
     id: "KXRAIN-AUS-2026OCT12",
+    sourceUrl: "https://kalshi.com/markets/KXRAIN-AUS-2026OCT12",
     title: "Will Austin record heavy rain on Oct 12, 2026?",
     rules:
       "Resolves Yes if the official Austin weather station records at least 1 inch of rain on Oct 12, 2026.",
@@ -23,6 +24,7 @@ export const mockMarkets: MarketCandidate[] = [
   {
     provider: "kalshi",
     id: "KXSTORM-TX-2026OCT",
+    sourceUrl: "https://kalshi.com/markets/KXSTORM-TX-2026OCT",
     title: "Will a named storm affect Texas in October 2026?",
     rules:
       "Resolves Yes if a named storm leads to a National Weather Service warning in Texas during October 2026.",
@@ -42,6 +44,7 @@ export const mockMarkets: MarketCandidate[] = [
   {
     provider: "polymarket",
     id: "PM-RAIN-US-SOUTH-OCT",
+    sourceUrl: "https://polymarket.com/event/us-south-severe-rainfall-event-in-october-2026",
     title: "US South severe rainfall event in October 2026?",
     rules:
       "Resolves according to a public severe weather bulletin for the US South region during October 2026.",
@@ -61,6 +64,7 @@ export const mockMarkets: MarketCandidate[] = [
   {
     provider: "kalshi",
     id: "KXHORMUZ-2026Q4",
+    sourceUrl: "https://kalshi.com/markets/KXHORMUZ-2026Q4",
     title: "Will the Strait of Hormuz face a major disruption in Q4 2026?",
     rules:
       "Resolves Yes if a listed public source reports a major shipping disruption in the Strait of Hormuz during Q4 2026.",
@@ -80,6 +84,7 @@ export const mockMarkets: MarketCandidate[] = [
   {
     provider: "kalshi",
     id: "KXCPI-2026OCT",
+    sourceUrl: "https://kalshi.com/markets/KXCPI-2026OCT",
     title: "Will US CPI exceed 3 percent for October 2026?",
     rules:
       "Resolves Yes if the official CPI report for October 2026 is above 3 percent year over year.",
