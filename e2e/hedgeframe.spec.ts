@@ -7,12 +7,27 @@ test("weather event user can create and execute a Kalshi demo hedge", async ({
   await page.waitForLoadState("networkidle");
 
   await expect(
-    page.getByRole("heading", { name: "What risk are you exposed to?" }),
+    page.getByRole("heading", {
+      name: "AI and prediction markets for long-tail hedging.",
+    }),
   ).toBeVisible();
-  await expect(page.getByText("How HedgeFrame works")).toBeVisible();
+  await expect(page.getByRole("button", { name: /Markets/ })).toBeVisible();
+  await expect(page.getByText("FEATURED WORKFLOW")).toBeVisible();
+  await expect(page.getByText("Built for exposed operators.")).toBeVisible();
   await expect(page.getByRole("button", { name: "Connect wallet" })).toBeVisible();
 
-  await page.getByRole("button", { name: "Map markets" }).click();
+  await page.mouse.wheel(0, 1450);
+  await expect
+    .poll(async () =>
+      page
+        .locator("[data-hero-prompt]")
+        .evaluate((element) => Number(getComputedStyle(element).opacity)),
+    )
+    .toBeGreaterThan(0.8);
+  await expect(page.getByRole("button", { name: "Map markets" }).first()).toBeVisible();
+  await page.evaluate(() => window.scrollTo(0, 0));
+
+  await page.getByRole("button", { name: "Map this scenario" }).click();
   await expect(page).toHaveURL(/\/markets/);
   await expect(page.getByText("Portfolio workspace")).toBeVisible();
   await expect(page.getByText("Will Austin record heavy rain")).toBeVisible();

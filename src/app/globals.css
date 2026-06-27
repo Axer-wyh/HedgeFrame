@@ -1,20 +1,21 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0c1116;
-  --foreground: #eef6f7;
-  --hf-bg: 12 17 22;
-  --hf-panel: 15 22 28;
-  --hf-panel-strong: 18 27 34;
-  --hf-field: 9 14 19;
-  --hf-text: 238 246 247;
-  --hf-muted: 143 162 168;
-  --hf-line: 35 50 58;
-  --hf-line-strong: 76 100 108;
-  --hf-accent: 150 249 255;
-  --hf-accent-soft: 187 253 255;
-  --hf-ink: 7 13 18;
-  --hf-disabled: 39 52 61;
+  --background: #090908;
+  --foreground: #f4f1e6;
+  --hf-bg: 9 9 8;
+  --hf-panel: 17 17 15;
+  --hf-panel-strong: 24 23 20;
+  --hf-field: 7 7 6;
+  --hf-text: 244 241 230;
+  --hf-muted: 159 154 137;
+  --hf-line: 47 45 38;
+  --hf-line-strong: 87 80 57;
+  --hf-accent: 245 198 66;
+  --hf-accent-soft: 255 221 112;
+  --hf-warning: 235 87 37;
+  --hf-ink: 12 11 8;
+  --hf-disabled: 58 54 43;
 }
 
 @theme inline {
@@ -46,16 +47,49 @@ body {
   font-family: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
 }
 
+main[data-tone="light"] {
+  --hf-bg: 229 226 214;
+  --hf-panel: 238 235 223;
+  --hf-panel-strong: 247 243 230;
+  --hf-field: 222 218 204;
+  --hf-text: 12 11 8;
+  --hf-muted: 86 80 65;
+  --hf-line: 194 186 164;
+  --hf-line-strong: 141 130 96;
+  --hf-accent: 214 166 28;
+  --hf-accent-soft: 236 191 48;
+  --hf-warning: 215 72 31;
+  --hf-ink: 12 11 8;
+  --hf-disabled: 185 178 156;
+}
+
 .hf-risk-map {
   background:
-    linear-gradient(115deg, transparent 0 36%, rgba(150, 249, 255, 0.22) 36.3%, transparent 36.8%),
-    linear-gradient(24deg, transparent 0 57%, rgba(150, 249, 255, 0.16) 57.3%, transparent 57.8%),
-    linear-gradient(rgba(150, 249, 255, 0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(150, 249, 255, 0.1) 1px, transparent 1px),
-    radial-gradient(circle at 18% 25%, rgba(150, 249, 255, 0.24), transparent 16%),
-    radial-gradient(circle at 78% 36%, rgba(150, 249, 255, 0.18), transparent 20%),
+    linear-gradient(115deg, transparent 0 36%, rgba(245, 198, 66, 0.28) 36.3%, transparent 36.8%),
+    linear-gradient(24deg, transparent 0 57%, rgba(235, 87, 37, 0.22) 57.3%, transparent 57.8%),
+    linear-gradient(rgba(245, 198, 66, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(245, 198, 66, 0.12) 1px, transparent 1px),
+    radial-gradient(circle at 18% 25%, rgba(245, 198, 66, 0.24), transparent 16%),
+    radial-gradient(circle at 78% 36%, rgba(235, 87, 37, 0.18), transparent 20%),
     rgb(var(--hf-field));
   background-size: auto, auto, 26px 26px, 26px 26px, auto, auto, auto;
+}
+
+.hf-mosaic-block {
+  animation: hf-pixel-breathe 4.8s ease-in-out infinite;
+}
+
+@keyframes hf-pixel-breathe {
+  0%,
+  100% {
+    filter: saturate(0.92) brightness(0.94);
+    transform: translateY(0);
+  }
+
+  48% {
+    filter: saturate(1.18) brightness(1.08);
+    transform: translateY(-3px);
+  }
 }
 
 button,
