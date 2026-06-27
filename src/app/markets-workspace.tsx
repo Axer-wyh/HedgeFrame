@@ -70,6 +70,9 @@ export function MarketsWorkspace({ initialScenario }: { initialScenario?: string
     () => matches.filter((match) => match.executionAllowed),
     [matches],
   );
+  const selectedCount = selectedMarketIds.length;
+  const hasSelectedMarkets = selectedCount > 0;
+  const canContinue = hasSelectedMarkets && Boolean(scenario?.id) && status !== "loading";
   const filteredMatches = useMemo(() => {
     if (filter === "kalshi") {
       return matches.filter((match) => match.market.provider === "kalshi");
@@ -198,7 +201,9 @@ export function MarketsWorkspace({ initialScenario }: { initialScenario?: string
     setStatus("loading");
     setStatusText("Building quote");
     setError(null);
+    setPlan(null);
     setExecution(null);
+    setAcknowledged(false);
 
     try {
       const payload = await postJson<{ plan: HedgePlan }>("/api/hedge-plans", {
@@ -220,6 +225,12 @@ export function MarketsWorkspace({ initialScenario }: { initialScenario?: string
           : "Unable to create hedge plan.",
       );
     }
+  }
+
+  async function continueToPlan() {
+    if (!canContinue) return;
+    setPlanOpen(true);
+    await createPlan();
   }
 
   async function runDemoOrder() {
@@ -380,16 +391,35 @@ export function MarketsWorkspace({ initialScenario }: { initialScenario?: string
 
         </section>
       </div>
-      <button
-        type="button"
-        onClick={() => setPlanOpen(true)}
-        className="fixed bottom-5 left-1/2 z-40 inline-flex h-12 -translate-x-1/2 items-center gap-3 rounded-[12px] border border-[rgb(var(--hf-line-strong))] bg-[rgb(var(--hf-panel-strong))] px-5 text-sm font-semibold text-[rgb(var(--hf-text))] shadow-[0_18px_70px_rgba(0,0,0,0.42)] transition hover:border-[rgb(var(--hf-accent))] hover:text-[rgb(var(--hf-accent))] active:translate-y-px"
+      <div
+        className="group fixed bottom-5 left-1/2 z-40 -translate-x-1/2"
+        title="Selected markets / total markets"
       >
-        Hedge plan
-        <span className="font-mono text-xs text-[rgb(var(--hf-muted))]">
-          {selectedMarketIds.length} selected / {executableMatches.length} demo eligible
+        <button
+          type="button"
+          onClick={continueToPlan}
+          disabled={!canContinue}
+          className={`inline-flex h-12 items-center gap-3 rounded-[12px] border px-5 text-sm font-semibold shadow-[0_18px_70px_rgba(0,0,0,0.42)] transition ${
+            canContinue
+              ? "border-[rgb(var(--hf-accent))] bg-[rgb(var(--hf-accent))] text-[rgb(var(--hf-ink))] hover:bg-[rgb(var(--hf-accent-soft))] active:translate-y-px"
+              : "cursor-not-allowed border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-disabled))] text-[rgb(var(--hf-muted))] shadow-none"
+          }`}
+        >
+          Continue
+          <span
+            className={`font-mono text-xs ${
+              canContinue
+                ? "text-[rgb(var(--hf-ink))]/75"
+                : "text-[rgb(var(--hf-muted))]"
+            }`}
+          >
+            {selectedCount}/{matches.length}
+          </span>
+        </button>
+        <span className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-[8px] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel-strong))] px-3 py-2 font-mono text-xs text-[rgb(var(--hf-muted))] opacity-0 shadow-[0_14px_48px_rgba(0,0,0,0.38)] transition group-hover:opacity-100 group-focus-within:opacity-100">
+          Selected markets / total markets
         </span>
-      </button>
+      </div>
       {detailMatch ? (
         <MarketDetailDialog
           match={detailMatch}
@@ -403,11 +433,10 @@ export function MarketsWorkspace({ initialScenario }: { initialScenario?: string
           <PlanPanel
             plan={plan}
             executableCount={executableMatches.length}
-            canCreatePlan={selectedMarketIds.length > 0 && Boolean(scenario?.id)}
             isBusy={status === "loading"}
+            error={status === "error" ? error : null}
             acknowledged={acknowledged}
             execution={execution}
-            onCreatePlan={createPlan}
             onAcknowledge={setAcknowledged}
             onRunDemoOrder={runDemoOrder}
           />
@@ -944,46 +973,61 @@ function PlanDialog({
 function PlanPanel({
   plan,
   executableCount,
-  canCreatePlan,
   isBusy,
+  error,
   acknowledged,
   execution,
-  onCreatePlan,
   onAcknowledge,
   onRunDemoOrder,
 }: {
   plan: HedgePlan | null;
   executableCount: number;
-  canCreatePlan: boolean;
   isBusy: boolean;
+  error: string | null;
   acknowledged: boolean;
   execution: OrderExecution | null;
-  onCreatePlan: () => void;
   onAcknowledge: (value: boolean) => void;
   onRunDemoOrder: () => void;
 }) {
   return (
     <aside className="space-y-4">
       <section className="rounded-[16px] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel))] p-4">
-        <div className="mb-4 flex items-center justify-end gap-4">
+        <div className="mb-4 flex items-center justify-between gap-4">
+          <span className="text-sm font-semibold">Quote detail</span>
           <span className="font-mono text-xs text-[rgb(var(--hf-muted))]">
             {executableCount} demo eligible
           </span>
         </div>
-        <button
-          type="button"
-          onClick={onCreatePlan}
-          disabled={!canCreatePlan || isBusy}
-          className="mb-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-[8px] border border-[rgb(var(--hf-line-strong))] px-3 text-sm font-semibold text-[rgb(var(--hf-text))] transition hover:bg-[rgb(var(--hf-field))] active:translate-y-px disabled:cursor-not-allowed disabled:border-[rgb(var(--hf-line))] disabled:text-[rgb(var(--hf-muted))]"
-        >
-          Build plan
-          <ArrowRight size={15} weight="bold" />
-        </button>
 
-        {!plan ? (
-          <p className="text-sm leading-6 text-[rgb(var(--hf-muted))]">
-            Choose demo-eligible markets to calculate cost, payout, remaining exposure, and execution checks.
-          </p>
+        {isBusy && !plan ? (
+          <div className="space-y-3">
+            <div className="rounded-[12px] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-field))] p-3">
+              <DecryptedText
+                text="building quote"
+                className="font-mono text-xs text-[rgb(var(--hf-accent))]"
+              />
+              <p className="mt-2 text-sm leading-6 text-[rgb(var(--hf-muted))]">
+                Calculating cost, payout, remaining exposure, and execution checks.
+              </p>
+            </div>
+            <div className="grid gap-3">
+              {[0, 1, 2].map((item) => (
+                <div
+                  key={item}
+                  className="h-16 animate-pulse rounded-[10px] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-field))]"
+                />
+              ))}
+            </div>
+          </div>
+        ) : !plan ? (
+          <div className="rounded-[12px] border border-red-300/30 bg-red-950/30 p-3">
+            <h3 className="text-sm font-semibold text-red-100">
+              Unable to build quote
+            </h3>
+            <p className="mt-2 text-sm leading-6 text-red-100/75">
+              {error ?? "Select at least one demo-eligible market and continue again."}
+            </p>
+          </div>
         ) : (
           <div className="space-y-4">
             <div className="grid gap-3">

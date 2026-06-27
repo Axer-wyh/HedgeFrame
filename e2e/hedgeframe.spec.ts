@@ -46,6 +46,11 @@ test("weather event user can create and execute a Kalshi demo hedge", async ({
   await expect(page.getByText("30 per page")).toBeVisible();
   await expect(page.getByRole("button", { name: "Previous page" })).toBeDisabled();
   await expect(page.getByRole("button", { name: "Next page" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: /Continue 1\/15/ })).toBeEnabled();
+  await page.getByRole("button", { name: "Selected", exact: true }).first().click();
+  await expect(page.getByRole("button", { name: /Continue 0\/15/ })).toBeDisabled();
+  await page.getByRole("button", { name: "Select", exact: true }).first().click();
+  await expect(page.getByRole("button", { name: /Continue 1\/15/ })).toBeEnabled();
   const filterWidths = await Promise.all(
     ["All", "Kalshi demo", "Polymarket", "Others"].map(async (name) => {
       const box = await page.getByRole("button", { name, exact: true }).boundingBox();
@@ -71,9 +76,9 @@ test("weather event user can create and execute a Kalshi demo hedge", async ({
   await page.getByRole("button", { name: "Close market details" }).click();
   await expect(page.getByRole("dialog", { name: "Will Austin record heavy rain on Oct 12, 2026?" })).toBeHidden();
 
-  await page.getByRole("button", { name: /Hedge plan/ }).click();
+  await page.getByRole("button", { name: /Continue/ }).click();
   await expect(page.getByRole("dialog", { name: "Hedge plan" })).toBeVisible();
-  await page.getByRole("button", { name: "Build plan" }).click();
+  await expect(page.getByText("Quote detail")).toBeVisible();
   await expect(page.getByText("Max payout")).toBeVisible();
 
   await page.getByLabel(/I understand this is not insurance/).check();
