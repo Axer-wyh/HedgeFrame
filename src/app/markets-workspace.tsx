@@ -13,6 +13,7 @@ import {
   ShieldWarning,
   Wallet,
   WarningDiamond,
+  X,
 } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -48,6 +49,8 @@ export function MarketsWorkspace({ initialScenario }: { initialScenario?: string
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<MarketFilter>("all");
   const [sort, setSort] = useState<MarketSort>("default");
+  const [detailMatch, setDetailMatch] = useState<MatchResult | null>(null);
+  const [planOpen, setPlanOpen] = useState(false);
   const [identityPanel, setIdentityPanel] = useState<IdentityPanelMode | null>(null);
   const hasAutoRun = useRef(false);
 
@@ -240,8 +243,8 @@ export function MarketsWorkspace({ initialScenario }: { initialScenario?: string
   }
 
   return (
-    <main className="min-h-[100dvh] bg-[rgb(var(--hf-bg))] text-[rgb(var(--hf-text))]">
-      <div className="mx-auto flex min-h-[100dvh] max-w-[1500px] flex-col px-4 py-4 sm:px-6 lg:px-8">
+    <main className="min-h-[100dvh] bg-[rgb(var(--hf-bg))] pb-24 text-[rgb(var(--hf-text))]">
+      <div className="mx-auto flex min-h-[100dvh] max-w-[1680px] flex-col px-4 py-4 sm:px-6 lg:px-8">
         <header className="flex min-h-16 flex-wrap items-center justify-between gap-3 border-b border-[rgb(var(--hf-line))] pb-4">
           <div className="flex items-center gap-3">
             <Link
@@ -280,7 +283,7 @@ export function MarketsWorkspace({ initialScenario }: { initialScenario?: string
           </div>
         </header>
 
-        <section className="grid flex-1 gap-4 py-4 lg:grid-cols-[330px_minmax(0,1fr)_390px]">
+        <section className="grid flex-1 gap-4 py-4 lg:grid-cols-[330px_minmax(0,1fr)]">
           <aside className="space-y-4">
             <ScenarioPanel
               rawText={rawText}
@@ -339,6 +342,7 @@ export function MarketsWorkspace({ initialScenario }: { initialScenario?: string
               matches={sortedMatches}
               selectedMarketIds={selectedMarketIds}
               loading={status === "loading" && matches.length === 0}
+              onOpenDetails={setDetailMatch}
               onToggleMarket={(marketId) => {
                 setSelectedMarketIds((current) =>
                   current.includes(marketId)
@@ -349,6 +353,28 @@ export function MarketsWorkspace({ initialScenario }: { initialScenario?: string
             />
           </section>
 
+        </section>
+      </div>
+      <button
+        type="button"
+        onClick={() => setPlanOpen(true)}
+        className="fixed bottom-5 left-1/2 z-40 inline-flex h-12 -translate-x-1/2 items-center gap-3 rounded-[12px] border border-[rgb(var(--hf-line-strong))] bg-[rgb(var(--hf-panel-strong))] px-5 text-sm font-semibold text-[rgb(var(--hf-text))] shadow-[0_18px_70px_rgba(0,0,0,0.42)] transition hover:border-[rgb(var(--hf-accent))] hover:text-[rgb(var(--hf-accent))] active:translate-y-px"
+      >
+        Hedge plan
+        <span className="font-mono text-xs text-[rgb(var(--hf-muted))]">
+          {selectedMarketIds.length} selected / {executableMatches.length} demo eligible
+        </span>
+      </button>
+      {detailMatch ? (
+        <MarketDetailDialog
+          match={detailMatch}
+          selected={selectedMarketIds.includes(detailMatch.market.id)}
+          onClose={() => setDetailMatch(null)}
+          onToggleMarket={() => onToggleMarketFromDialog(detailMatch.market.id)}
+        />
+      ) : null}
+      {planOpen ? (
+        <PlanDialog onClose={() => setPlanOpen(false)}>
           <PlanPanel
             plan={plan}
             executableCount={executableMatches.length}
@@ -360,13 +386,21 @@ export function MarketsWorkspace({ initialScenario }: { initialScenario?: string
             onAcknowledge={setAcknowledged}
             onRunDemoOrder={runDemoOrder}
           />
-        </section>
-      </div>
+        </PlanDialog>
+      ) : null}
       {identityPanel ? (
         <IdentityPanel mode={identityPanel} onClose={() => setIdentityPanel(null)} />
       ) : null}
     </main>
   );
+
+  function onToggleMarketFromDialog(marketId: string) {
+    setSelectedMarketIds((current) =>
+      current.includes(marketId)
+        ? current.filter((id) => id !== marketId)
+        : [...current, marketId],
+    );
+  }
 }
 
 function ScenarioPanel({
@@ -508,20 +542,22 @@ function MatchesPanel({
   matches,
   selectedMarketIds,
   loading,
+  onOpenDetails,
   onToggleMarket,
 }: {
   matches: MatchResult[];
   selectedMarketIds: string[];
   loading: boolean;
+  onOpenDetails: (match: MatchResult) => void;
   onToggleMarket: (marketId: string) => void;
 }) {
   if (loading) {
     return (
-      <section className="grid gap-3">
-        {[0, 1, 2].map((item) => (
+      <section className="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
+        {[0, 1, 2, 3, 4, 5].map((item) => (
           <div
             key={item}
-            className="h-36 animate-pulse rounded-[16px] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel))]"
+            className="h-52 animate-pulse rounded-[16px] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel))]"
           />
         ))}
       </section>
@@ -540,13 +576,13 @@ function MatchesPanel({
   }
 
   return (
-    <section className="grid gap-3">
+    <section className="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
       {matches.map((match, index) => {
         const selected = selectedMarketIds.includes(match.market.id);
         return (
           <Reveal key={match.market.id} delay={index * 0.03}>
             <div
-              className={`rounded-[16px] border p-4 transition ${
+              className={`flex min-h-64 flex-col rounded-[16px] border p-4 transition ${
                 selected
                   ? "border-[rgb(var(--hf-accent))]/75 bg-[rgb(var(--hf-accent))]/10"
                   : "border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel))] hover:border-[rgb(var(--hf-line-strong))]"
@@ -573,43 +609,190 @@ function MatchesPanel({
               </div>
               <button
                 type="button"
-                onClick={() => onToggleMarket(match.market.id)}
-                className="block w-full text-left transition active:translate-y-px"
+                onClick={() => onOpenDetails(match)}
+                className="block flex-1 text-left transition active:translate-y-px"
               >
-                <div className="grid gap-4 xl:grid-cols-[1fr_130px]">
-                  <div>
-                    <h3
-                      data-market-card-title
-                      className="text-lg font-semibold tracking-[-0.015em]"
-                    >
-                      {match.market.title}
-                    </h3>
-                    <p className="mt-2 line-clamp-2 text-sm leading-6 text-[rgb(var(--hf-muted))]">
-                      {match.market.rules}
-                    </p>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 xl:grid-cols-1">
-                    <Metric label="Score" value={String(Math.round(match.score))} />
-                    <Metric label="Ask" value={`$${match.market.bestAsk.toFixed(2)}`} />
-                    <Metric label="Liquidity" value={formatMoney(match.market.liquidity)} />
-                  </div>
+                <h3
+                  data-market-card-title
+                  className="text-lg font-semibold leading-snug tracking-[-0.015em]"
+                >
+                  {match.market.title}
+                </h3>
+                <p className="mt-2 line-clamp-3 text-sm leading-6 text-[rgb(var(--hf-muted))]">
+                  {match.market.rules}
+                </p>
+                <div className="mt-4 grid grid-cols-3 gap-2">
+                  <Metric label="Score" value={String(Math.round(match.score))} />
+                  <Metric label="Ask" value={`$${match.market.bestAsk.toFixed(2)}`} />
+                  <Metric label="Liquidity" value={formatMoney(match.market.liquidity)} />
                 </div>
-                <div className="mt-4 grid gap-3 text-sm leading-6 text-[rgb(var(--hf-muted))] md:grid-cols-2">
-                  <p>
-                    <span className="text-[rgb(var(--hf-text))]">Covers:</span>{" "}
-                    {match.covered.join(", ")}
-                  </p>
-                  <p>
-                    <span className="text-[rgb(var(--hf-text))]">Does not cover:</span>{" "}
-                    {match.notCovered.join(", ")}
-                  </p>
-                </div>
+                <p className="mt-3 line-clamp-2 text-sm leading-6 text-[rgb(var(--hf-muted))]">
+                  <span className="text-[rgb(var(--hf-text))]">Covers:</span>{" "}
+                  {match.covered.join(", ")}
+                </p>
+              </button>
+              <button
+                type="button"
+                onClick={() => onToggleMarket(match.market.id)}
+                className={`mt-4 inline-flex h-9 items-center justify-center rounded-[8px] border px-3 text-sm font-semibold transition active:translate-y-px ${
+                  selected
+                    ? "border-[rgb(var(--hf-accent))] bg-[rgb(var(--hf-accent))] text-[rgb(var(--hf-ink))]"
+                    : "border-[rgb(var(--hf-line-strong))] text-[rgb(var(--hf-text))] hover:bg-[rgb(var(--hf-field))]"
+                }`}
+              >
+                {selected ? "Selected" : "Select"}
               </button>
             </div>
           </Reveal>
         );
       })}
     </section>
+  );
+}
+
+function MarketDetailDialog({
+  match,
+  selected,
+  onClose,
+  onToggleMarket,
+}: {
+  match: MatchResult;
+  selected: boolean;
+  onClose: () => void;
+  onToggleMarket: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 grid place-items-center bg-black/70 px-4 py-8 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="market-detail-title"
+    >
+      <div className="max-h-[88dvh] w-full max-w-4xl overflow-y-auto rounded-[16px] border border-[rgb(var(--hf-line-strong))] bg-[rgb(var(--hf-panel-strong))] p-5 shadow-[0_24px_90px_rgba(0,0,0,0.48)]">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <div className="mb-3 flex flex-wrap gap-2">
+              <Badge>{match.market.provider}</Badge>
+              <Badge>{match.confidence} confidence</Badge>
+              <Badge>{match.executionAllowed ? "demo ready" : "blocked"}</Badge>
+            </div>
+            <h2
+              id="market-detail-title"
+              className="text-2xl font-semibold leading-tight tracking-[-0.03em]"
+            >
+              {match.market.title}
+            </h2>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close market details"
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] border border-[rgb(var(--hf-line))] text-[rgb(var(--hf-muted))] transition hover:text-[rgb(var(--hf-text))] active:translate-y-px"
+          >
+            <X size={16} weight="bold" />
+          </button>
+        </div>
+
+        <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_220px]">
+          <div className="space-y-4">
+            <section className="rounded-[12px] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-field))] p-4">
+              <h3 className="text-sm font-semibold">Settlement rule</h3>
+              <p className="mt-2 text-sm leading-6 text-[rgb(var(--hf-muted))]">
+                {match.market.rules}
+              </p>
+            </section>
+            <section className="grid gap-3 md:grid-cols-2">
+              <div className="rounded-[12px] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-field))] p-4">
+                <h3 className="text-sm font-semibold">Covers</h3>
+                <p className="mt-2 text-sm leading-6 text-[rgb(var(--hf-muted))]">
+                  {match.covered.join(", ")}
+                </p>
+              </div>
+              <div className="rounded-[12px] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-field))] p-4">
+                <h3 className="text-sm font-semibold">Does not cover</h3>
+                <p className="mt-2 text-sm leading-6 text-[rgb(var(--hf-muted))]">
+                  {match.notCovered.join(", ")}
+                </p>
+              </div>
+            </section>
+            <section className="rounded-[12px] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-field))] p-4">
+              <h3 className="text-sm font-semibold">Basis risk notes</h3>
+              <ul className="mt-2 space-y-2 text-sm leading-6 text-[rgb(var(--hf-muted))]">
+                {match.basisRiskNotes.map((note) => (
+                  <li key={note}>{note}</li>
+                ))}
+              </ul>
+            </section>
+          </div>
+          <aside className="space-y-3">
+            <Metric label="Score" value={String(Math.round(match.score))} />
+            <Metric label="Ask" value={`$${match.market.bestAsk.toFixed(2)}`} />
+            <Metric label="Liquidity" value={formatMoney(match.market.liquidity)} />
+            <Metric label="Open interest" value={formatMoney(match.market.openInterest)} />
+            <Metric
+              label="Closes"
+              value={new Date(match.market.closeTime).toLocaleDateString()}
+            />
+            {match.market.sourceUrl ? (
+              <a
+                href={match.market.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-[8px] border border-[rgb(var(--hf-line-strong))] text-sm font-semibold text-[rgb(var(--hf-text))] transition hover:border-[rgb(var(--hf-accent))] hover:text-[rgb(var(--hf-accent))] active:translate-y-px"
+              >
+                Open source market
+                <ArrowSquareOut size={15} weight="bold" />
+              </a>
+            ) : null}
+            <button
+              type="button"
+              onClick={onToggleMarket}
+              className={`inline-flex h-10 w-full items-center justify-center rounded-[8px] border px-3 text-sm font-semibold transition active:translate-y-px ${
+                selected
+                  ? "border-[rgb(var(--hf-accent))] bg-[rgb(var(--hf-accent))] text-[rgb(var(--hf-ink))]"
+                  : "border-[rgb(var(--hf-line-strong))] text-[rgb(var(--hf-text))] hover:bg-[rgb(var(--hf-field))]"
+              }`}
+            >
+              {selected ? "Selected" : "Select"}
+            </button>
+          </aside>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PlanDialog({
+  children,
+  onClose,
+}: {
+  children: React.ReactNode;
+  onClose: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 grid place-items-center bg-black/70 px-4 py-8 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="hedge-plan-title"
+    >
+      <div className="max-h-[88dvh] w-full max-w-xl overflow-y-auto rounded-[16px] border border-[rgb(var(--hf-line-strong))] bg-[rgb(var(--hf-panel-strong))] p-5 shadow-[0_24px_90px_rgba(0,0,0,0.48)]">
+        <div className="mb-4 flex items-center justify-between gap-4">
+          <h2 id="hedge-plan-title" className="text-xl font-semibold">
+            Hedge plan
+          </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close hedge plan"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-[rgb(var(--hf-line))] text-[rgb(var(--hf-muted))] transition hover:text-[rgb(var(--hf-text))] active:translate-y-px"
+          >
+            <X size={16} weight="bold" />
+          </button>
+        </div>
+        {children}
+      </div>
+    </div>
   );
 }
 
@@ -637,8 +820,7 @@ function PlanPanel({
   return (
     <aside className="space-y-4">
       <section className="rounded-[16px] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel))] p-4">
-        <div className="mb-4 flex items-center justify-between gap-4">
-          <h2 className="text-lg font-semibold">Hedge plan</h2>
+        <div className="mb-4 flex items-center justify-end gap-4">
           <span className="font-mono text-xs text-[rgb(var(--hf-muted))]">
             {executableCount} demo eligible
           </span>
