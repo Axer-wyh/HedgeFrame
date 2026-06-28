@@ -54,6 +54,12 @@ test("weather event user can create and execute a Kalshi demo hedge", async ({
     .getByRole("heading", { name: "For people carrying weird risk." })
     .evaluate((element) => element.getBoundingClientRect().top + window.scrollY);
   expect(trustSectionTop).toBeLessThan(audienceSectionTop);
+  const audienceSectionHeight = await page
+    .getByRole("heading", { name: "For people carrying weird risk." })
+    .evaluate((element) => element.closest("section")?.getBoundingClientRect().height ?? 0);
+  expect(audienceSectionHeight).toBeGreaterThanOrEqual(
+    (page.viewportSize()?.height ?? 0) * 0.75,
+  );
   const riskStoriesRail = page.getByRole("region", {
     name: "Risk stories in motion",
   });

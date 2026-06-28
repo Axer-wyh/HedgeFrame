@@ -521,7 +521,7 @@ function PromptBox({
 function AudienceGrid() {
   return (
     <section className="overflow-hidden border-b border-[rgb(var(--hf-line))]">
-      <div className="grid min-h-[520px] grid-cols-[430px_minmax(0,1fr)]">
+      <div className="grid min-h-[75dvh] grid-cols-[430px_minmax(0,1fr)]">
         <div className="flex flex-col justify-between border-r border-[rgb(var(--hf-line))] p-10">
           <div>
             <h2 className="text-6xl font-semibold leading-none">
