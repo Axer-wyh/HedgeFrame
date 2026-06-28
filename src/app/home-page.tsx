@@ -635,7 +635,7 @@ function HowItWorks() {
               key={title}
               className="grid grid-cols-[240px_1fr] border-b border-[rgb(var(--hf-line))]"
             >
-              <div className="flex items-center border-r border-[rgb(var(--hf-line))] p-8 text-5xl font-semibold tracking-[-0.06em]">
+              <div className="flex items-center border-r border-[rgb(var(--hf-line))] p-8 text-4xl font-semibold tracking-[-0.05em]">
                 {title}
               </div>
               <div className="flex items-center p-8 text-2xl leading-tight tracking-[-0.035em] text-[rgb(var(--hf-muted))]">

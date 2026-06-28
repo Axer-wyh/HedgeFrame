@@ -38,6 +38,14 @@ test("weather event user can create and execute a Kalshi demo hedge", async ({
   ).toBeVisible();
   await expect(page.getByText("REAL WORRY", { exact: true })).toBeVisible();
   await expect(page.getByText("From one worry to one hedge path.")).toBeVisible();
+  for (const title of ["Say it", "We map it", "Hedge it"]) {
+    const lineCount = await page.getByText(title, { exact: true }).evaluate((node) => {
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      return Array.from(range.getClientRects()).filter((rect) => rect.width > 1).length;
+    });
+    expect(lineCount).toBe(1);
+  }
   const partnerRail = page.getByRole("region", {
     name: "Market infrastructure platforms",
   });
