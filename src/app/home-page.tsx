@@ -646,12 +646,12 @@ function HowItWorks() {
         </div>
       </div>
       <div className="border-t border-[rgb(var(--hf-line))]">
-        <div className="flex min-h-[190px] min-w-0 items-center overflow-hidden py-8">
+        <div className="flex min-h-[260px] min-w-0 items-center overflow-hidden py-8">
           <LogoLoop
             logos={platformLogos}
             speed={82}
             direction="left"
-            logoHeight={88}
+            logoHeight={128}
             gap={0}
             hoverSpeed={0}
             scaleOnHover
@@ -659,7 +659,7 @@ function HowItWorks() {
             fadeOutColor="rgb(var(--hf-bg))"
             ariaLabel="Market infrastructure platforms"
             className="flex items-center"
-            style={{ height: 190 }}
+            style={{ height: 260 }}
           />
         </div>
       </div>
@@ -669,8 +669,8 @@ function HowItWorks() {
 
 function PlatformLogo({ code, name }: { code: string; name: string }) {
   return (
-    <span className="inline-flex h-28 min-w-[250px] items-center justify-center gap-5 border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel))] px-8 text-[rgb(var(--hf-text))] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-      <span className="grid h-10 w-10 place-items-center bg-[rgb(var(--hf-accent))] font-mono text-sm font-semibold text-[rgb(var(--hf-ink))]">
+    <span className="inline-flex h-48 w-56 items-center justify-center gap-5 border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel))] px-6 text-[rgb(var(--hf-text))] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+      <span className="grid h-11 w-11 place-items-center bg-[rgb(var(--hf-accent))] font-mono text-sm font-semibold text-[rgb(var(--hf-ink))]">
         {code}
       </span>
       <span className="text-xl font-semibold tracking-[-0.03em]">{name}</span>

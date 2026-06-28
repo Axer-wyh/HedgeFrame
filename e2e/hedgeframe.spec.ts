@@ -61,11 +61,13 @@ test("weather event user can create and execute a Kalshi demo hedge", async ({
         railHeight: railRect?.height ?? 0,
         tileHeight: linkRect.height,
         tileWidth: linkRect.width,
+        tileRatio: linkRect.width / linkRect.height,
       };
     });
-  expect(platformRailLayout.railHeight).toBeGreaterThanOrEqual(180);
-  expect(platformRailLayout.tileHeight).toBeGreaterThanOrEqual(96);
-  expect(platformRailLayout.tileWidth).toBeGreaterThanOrEqual(220);
+  expect(platformRailLayout.railHeight).toBeGreaterThanOrEqual(240);
+  expect(platformRailLayout.tileHeight).toBeGreaterThanOrEqual(176);
+  expect(platformRailLayout.tileWidth).toBeGreaterThanOrEqual(176);
+  expect(platformRailLayout.tileRatio).toBeLessThanOrEqual(1.35);
   await expect(page.getByText("Outdoor wedding planner")).toBeVisible();
   await expect(page.getByText("Trust before execution.")).toBeVisible();
   await expect(page.getByText("For people carrying weird risk.")).toBeVisible();
