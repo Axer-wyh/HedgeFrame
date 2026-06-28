@@ -522,22 +522,24 @@ function AudienceGrid() {
   return (
     <section className="overflow-hidden border-b border-[rgb(var(--hf-line))]">
       <div className="grid min-h-[75dvh] grid-cols-[430px_minmax(0,1fr)]">
-        <div className="flex flex-col justify-between border-r border-[rgb(var(--hf-line))] p-10">
-          <div>
-            <h2 className="text-6xl font-semibold leading-none">
-            For people carrying weird risk.
-            </h2>
-            <p className="mt-6 max-w-[34ch] text-base leading-7 text-[rgb(var(--hf-muted))]">
-              The old path starts with forms and underwriting language.
-              HedgeFrame starts with the worry in your own words.
-            </p>
-          </div>
-          <div className="max-w-[31ch] border-l border-[rgb(var(--hf-accent))] pl-4 text-sm leading-6 text-[rgb(var(--hf-text))]">
-            Real operators bring messy exposure. The product turns it into a
-            ranked hedge path with explicit basis risk.
+        <div className="flex items-center border-r border-[rgb(var(--hf-line))] p-10">
+          <div className="flex h-[430px] w-full flex-col justify-between">
+            <div>
+              <h2 className="text-6xl font-semibold leading-none">
+                For people carrying weird risk.
+              </h2>
+              <p className="mt-6 max-w-[34ch] text-base leading-7 text-[rgb(var(--hf-muted))]">
+                The old path starts with forms and underwriting language.
+                HedgeFrame starts with the worry in your own words.
+              </p>
+            </div>
+            <div className="max-w-[31ch] border-l border-[rgb(var(--hf-accent))] pl-4 text-sm leading-6 text-[rgb(var(--hf-text))]">
+              Real operators bring messy exposure. The product turns it into a
+              ranked hedge path with explicit basis risk.
+            </div>
           </div>
         </div>
-        <div className="flex min-w-0 items-start overflow-hidden py-10">
+        <div className="flex min-w-0 items-center overflow-hidden">
           <LogoLoop
             logos={riskStories}
             speed={44}

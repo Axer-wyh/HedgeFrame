@@ -44,6 +44,7 @@ test("weather event user can create and execute a Kalshi demo hedge", async ({
   await expect(partnerRail).toBeVisible();
   await expect(partnerRail.getByRole("link", { name: "Kalshi" }).first()).toBeVisible();
   await expect(partnerRail.getByRole("link", { name: "Polymarket" }).first()).toBeVisible();
+  await page.setViewportSize({ width: 1833, height: 1027 });
   await expect(page.getByText("Outdoor wedding planner")).toBeVisible();
   await expect(page.getByText("Trust before execution.")).toBeVisible();
   await expect(page.getByText("For people carrying weird risk.")).toBeVisible();
@@ -77,16 +78,21 @@ test("weather event user can create and execute a Kalshi demo hedge", async ({
 
       const headingRect = heading.getBoundingClientRect();
       const cardRect = firstCard.getBoundingClientRect();
+      const sectionRect = section.getBoundingClientRect();
       const maxCardOverflow = Math.max(
         ...cards.map((card) => card.scrollHeight - card.getBoundingClientRect().height),
       );
 
       return {
+        centerDelta: Math.abs(
+          cardRect.top + cardRect.height / 2 - (sectionRect.top + sectionRect.height / 2),
+        ),
         topDelta: Math.abs(headingRect.top - cardRect.top),
         maxCardOverflow,
       };
     });
   expect(riskStoryLayout).not.toBeNull();
+  expect(riskStoryLayout?.centerDelta).toBeLessThanOrEqual(24);
   expect(riskStoryLayout?.topDelta).toBeLessThanOrEqual(24);
   expect(riskStoryLayout?.maxCardOverflow).toBeLessThanOrEqual(1);
   const firstRiskTransform = await riskStoriesRail
