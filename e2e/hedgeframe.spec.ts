@@ -45,7 +45,15 @@ test("weather event user can create and execute a Kalshi demo hedge", async ({
   await expect(partnerRail.getByRole("link", { name: "Kalshi" }).first()).toBeVisible();
   await expect(partnerRail.getByRole("link", { name: "Polymarket" }).first()).toBeVisible();
   await expect(page.getByText("Outdoor wedding planner")).toBeVisible();
+  await expect(page.getByText("Trust before execution.")).toBeVisible();
   await expect(page.getByText("For people carrying weird risk.")).toBeVisible();
+  const trustSectionTop = await page
+    .getByRole("heading", { name: "Trust before execution." })
+    .evaluate((element) => element.getBoundingClientRect().top + window.scrollY);
+  const audienceSectionTop = await page
+    .getByRole("heading", { name: "For people carrying weird risk." })
+    .evaluate((element) => element.getBoundingClientRect().top + window.scrollY);
+  expect(trustSectionTop).toBeLessThan(audienceSectionTop);
   const riskStoriesRail = page.getByRole("region", {
     name: "Risk stories in motion",
   });

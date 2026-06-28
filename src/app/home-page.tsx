@@ -247,8 +247,8 @@ export function HomePage() {
       <PinnedHero rawText={rawText} onRawTextChange={setRawText} onSubmit={submitScenario} />
       <HowItWorks />
       <ScenarioLibrary onSelectScenario={chooseScenario} />
-      <AudienceGrid />
       <ExecutionBoundaries />
+      <AudienceGrid />
       <BottomPrompt rawText={rawText} onRawTextChange={setRawText} onSubmit={submitScenario} />
       <Footer />
 
