@@ -23,7 +23,7 @@ describe("HomePage", () => {
         name: "Plain-words worry to executable hedge.",
       }),
     ).toBeInTheDocument();
-    expect(screen.getByText("你担心什么，就说出来试试。")).toBeInTheDocument();
+    expect(screen.getByText("Say what you're worried about.")).toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: "Map markets" }).length).toBeGreaterThan(0);
     const header = within(screen.getByRole("banner"));
     expect(header.getByRole("link", { name: "How it works" })).toBeInTheDocument();

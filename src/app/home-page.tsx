@@ -33,7 +33,7 @@ const heroTitleSecondary = "We'll find the hedge.";
 const heroTitle = `${heroTitlePrimary} ${heroTitleSecondary}`;
 const heroSubtitle =
   "HedgeFrame turns a plain-words worry into a real, executable hedge on prediction markets. Not insurance. No paperwork.";
-const heroChineseLine = "你担心什么，就说出来试试。";
+const heroEyebrow = "Say what you're worried about.";
 const visionLinePrimary = "Plain-words worry to";
 const visionLineSecondary = "executable hedge.";
 const visionLine = `${visionLinePrimary} ${visionLineSecondary}`;
@@ -440,7 +440,7 @@ function PinnedHero({
         >
           <div className="flex h-full flex-col justify-end">
             <p className="mb-6 max-w-fit bg-[rgb(var(--hf-accent))] px-2 py-1 font-mono text-xs text-[rgb(var(--hf-ink))]">
-              {heroChineseLine}
+              {heroEyebrow}
             </p>
             <h1
               aria-label={heroTitle}

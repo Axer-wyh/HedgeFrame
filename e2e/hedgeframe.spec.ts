@@ -11,7 +11,7 @@ test("weather event user can create and execute a Kalshi demo hedge", async ({
       name: "Name what you're afraid of. We'll find the hedge.",
     }),
   ).toBeVisible();
-  await expect(page.getByText("你担心什么，就说出来试试。")).toBeVisible();
+  await expect(page.getByText("Say what you're worried about.")).toBeVisible();
   const header = page.locator("header");
   await expect(header.getByRole("link", { name: "How it works" })).toBeVisible();
   await expect(header.getByRole("link", { name: "Use cases" })).toBeVisible();
