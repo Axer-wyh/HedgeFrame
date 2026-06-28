@@ -11,6 +11,7 @@ import {
   Funnel,
   MagnifyingGlass,
   ShieldWarning,
+  Wallet,
   WarningDiamond,
   X,
 } from "@phosphor-icons/react";
@@ -68,6 +69,7 @@ export function MarketsWorkspace({ initialScenario }: { initialScenario?: string
   const [identityPanel, setIdentityPanel] = useState<IdentityPanelMode | null>(null);
   const [page, setPage] = useState(1);
   const [tone, setTone] = useState<SiteTone>("dark");
+  const [walletConnected, setWalletConnected] = useState(false);
   const hasAutoRun = useRef(false);
 
   const executableMatches = useMemo(
@@ -238,7 +240,7 @@ export function MarketsWorkspace({ initialScenario }: { initialScenario?: string
   }
 
   async function runDemoOrder() {
-    if (!plan || !acknowledged) return;
+    if (!plan || !acknowledged || !walletConnected) return;
 
     setStatus("loading");
     setStatusText("Submitting demo order");
@@ -410,8 +412,10 @@ export function MarketsWorkspace({ initialScenario }: { initialScenario?: string
             isBusy={status === "loading"}
             error={status === "error" ? error : null}
             acknowledged={acknowledged}
+            walletConnected={walletConnected}
             execution={execution}
             onAcknowledge={setAcknowledged}
+            onConnectWallet={() => setWalletConnected(true)}
             onRunDemoOrder={runDemoOrder}
           />
         </PlanDialog>
@@ -1261,8 +1265,10 @@ function PlanPanel({
   isBusy,
   error,
   acknowledged,
+  walletConnected,
   execution,
   onAcknowledge,
+  onConnectWallet,
   onRunDemoOrder,
 }: {
   plan: HedgePlan | null;
@@ -1270,8 +1276,10 @@ function PlanPanel({
   isBusy: boolean;
   error: string | null;
   acknowledged: boolean;
+  walletConnected: boolean;
   execution: OrderExecution | null;
   onAcknowledge: (value: boolean) => void;
+  onConnectWallet: () => void;
   onRunDemoOrder: () => void;
 }) {
   return (
@@ -1349,14 +1357,32 @@ function PlanPanel({
               />
               I understand this is not insurance, and the demo order may not match any real-world loss.
             </label>
+            <div className="rounded-[12px] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-field))] p-3">
+              <div className="flex items-center gap-2 text-sm font-semibold">
+                <Wallet size={16} weight="bold" />
+                {walletConnected ? "Demo wallet connected" : "Demo wallet required"}
+              </div>
+              <p className="mt-2 text-xs leading-5 text-[rgb(var(--hf-muted))]">
+                Connect a demo wallet before confirmation. This prototype does not
+                request deposits, private keys, or custody credentials.
+              </p>
+            </div>
             <button
               type="button"
-              onClick={onRunDemoOrder}
-              disabled={!acknowledged || isBusy || Boolean(execution)}
+              onClick={walletConnected ? onRunDemoOrder : onConnectWallet}
+              disabled={
+                walletConnected
+                  ? !acknowledged || isBusy || Boolean(execution)
+                  : isBusy || Boolean(execution)
+              }
               className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-[8px] bg-[rgb(var(--hf-accent))] px-3 text-sm font-semibold text-[rgb(var(--hf-ink))] transition hover:bg-[rgb(var(--hf-accent-soft))] active:translate-y-px disabled:cursor-not-allowed disabled:bg-[rgb(var(--hf-disabled))] disabled:text-[rgb(var(--hf-muted))]"
             >
-              <CheckCircle size={16} weight="bold" />
-              Run demo order
+              {walletConnected ? (
+                <CheckCircle size={16} weight="bold" />
+              ) : (
+                <Wallet size={16} weight="bold" />
+              )}
+              {walletConnected ? "Confirm" : "Connect wallet"}
             </button>
           </div>
         )}

@@ -153,9 +153,14 @@ test("weather event user can create and execute a Kalshi demo hedge", async ({
   await expect(page.getByRole("dialog", { name: "Hedge plan" })).toBeVisible();
   await expect(page.getByText("Quote detail")).toBeVisible();
   await expect(page.getByText("Max payout")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Connect wallet" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Run demo order" })).toHaveCount(0);
+  await page.getByRole("button", { name: "Connect wallet" }).click();
+  await expect(page.getByText("Demo wallet connected")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Confirm" })).toBeDisabled();
 
   await page.getByLabel(/I understand this is not insurance/).check();
-  await page.getByRole("button", { name: "Run demo order" }).click();
+  await page.getByRole("button", { name: "Confirm" }).click();
 
   await expect(page.getByText(/Demo execution filled/)).toBeVisible();
   await page.goto("/account?view=orders");
