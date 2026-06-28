@@ -5,7 +5,6 @@ import {
   Check,
   CloudRain,
   GlobeHemisphereWest,
-  LockKey,
   MagnifyingGlass,
   Moon,
   Plus,
@@ -21,6 +20,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
+import { AccountNav } from "./account-nav";
 import { IdentityPanel, type IdentityPanelMode } from "./identity-panel";
 import { DecryptedText, Reveal } from "./motion-primitives";
 
@@ -197,14 +197,7 @@ function SiteHeader({
         >
           About
         </a>
-        <button
-          type="button"
-          onClick={onLogin}
-          className="flex items-center justify-center gap-2 border-l border-[rgb(var(--hf-line))] text-sm transition hover:bg-[rgb(var(--hf-panel))] active:translate-y-px"
-        >
-          <LockKey size={15} />
-          Log in
-        </button>
+        <AccountNav surface="home" onLogin={onLogin} />
         <a
           href="#try-scenario"
           className="flex items-center justify-center gap-2 border-l border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-accent))] text-sm font-semibold text-[rgb(var(--hf-ink))] transition hover:bg-[rgb(var(--hf-accent-soft))] active:translate-y-px"

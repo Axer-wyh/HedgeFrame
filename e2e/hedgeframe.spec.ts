@@ -30,6 +30,12 @@ test("weather event user can create and execute a Kalshi demo hedge", async ({
   await expect(header.getByRole("button", { name: /Markets/ })).toHaveCount(0);
   await expect(header.getByRole("link", { name: "Try a scenario" })).toBeVisible();
   await expect(header.getByRole("button", { name: "Connect wallet" })).toHaveCount(0);
+  await header.getByRole("button", { name: "Log in" }).click();
+  await expect(page.getByRole("dialog", { name: "Log in" })).toBeVisible();
+  await page.getByRole("button", { name: "Continue in demo mode" }).click();
+  await expect(
+    header.getByRole("button", { name: /Open account menu for Demo operator/ }),
+  ).toBeVisible();
   await expect(page.getByText("REAL WORRY", { exact: true })).toBeVisible();
   await expect(page.getByText("From one worry to one hedge path.")).toBeVisible();
   await expect(page.getByText("Outdoor wedding planner")).toBeVisible();
@@ -148,6 +154,26 @@ test("weather event user can create and execute a Kalshi demo hedge", async ({
   await page.getByRole("button", { name: "Run demo order" }).click();
 
   await expect(page.getByText(/Demo execution filled/)).toBeVisible();
+  await page.goto("/account?view=orders");
+  await expect(page.getByRole("heading", { name: "My orders" })).toBeVisible();
+  await expect(page.getByText("My outdoor event loses $80k")).toBeVisible();
+  await expect(page.getByText("filled", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: /Order exec_/ }).click();
+  await expect(page.getByText("Associated hedge plan")).toBeVisible();
+
+  await page.goto("/account?view=profile");
+  await page.getByLabel("Organization").fill("North Pier Events");
+  await page.getByRole("button", { name: "Save profile" }).click();
+  await expect(page.getByText("Profile saved")).toBeVisible();
+  await page.reload();
+  await expect(page.getByLabel("Organization")).toHaveValue("North Pier Events");
+
+  await page.goto("/account?view=security");
+  await expect(page.getByRole("heading", { name: "Security center" })).toBeVisible();
+  await expect(page.getByText("Platform Kalshi demo account")).toBeVisible();
+  await expect(page.getByText("Wallet not connected")).toBeVisible();
+  await expect(page.getByText("No private keys stored")).toBeVisible();
+  await expect(page.getByText(/insurance payout|guaranteed coverage|risk-free/i)).toHaveCount(0);
   await expect(
     page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth,

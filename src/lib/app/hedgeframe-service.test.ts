@@ -167,4 +167,61 @@ describe("HedgeFrame application service", () => {
       }),
     ).rejects.toThrow("Market liquidity is below demo threshold");
   });
+
+  it("scopes scenarios, plans, demo orders, and audit activity to a demo user", async () => {
+    const repository = createMemoryRepository();
+    const { user } = await repository.createDemoSession({
+      now: new Date("2026-06-24T10:00:00Z"),
+    });
+    const { user: otherUser } = await repository.createDemoSession({
+      now: new Date("2026-06-24T10:05:00Z"),
+    });
+
+    const scenario = await createScenario(repository, {
+      rawText: "My outdoor event loses $80k if heavy rain hits Austin on Oct 12.",
+      userId: user.id,
+    });
+    const matches = await getScenarioMatches(repository, scenario.id, {
+      userId: user.id,
+    });
+    const plan = await createHedgePlan(repository, {
+      scenarioId: scenario.id,
+      marketIds: [matches[0].market.id],
+      budget: 12000,
+      targetCoverage: 0.4,
+      now: new Date("2026-06-24T12:00:00Z"),
+      userId: user.id,
+    });
+    await createDemoOrder(repository, {
+      planId: plan.id,
+      confirmedAt: new Date("2026-06-24T12:01:00Z"),
+      confirmationText: "I understand this is not insurance.",
+      idempotencyKey: "user-scoped-order",
+      userId: user.id,
+    });
+
+    const dashboard = await repository.getAccountDashboard(user.id);
+    const orders = await repository.listAccountOrders(user.id);
+
+    expect(dashboard.metrics).toMatchObject({
+      activeScenarios: 1,
+      demoOrders: 1,
+      estimatedExposure: 80000,
+    });
+    expect(dashboard.recentActivity.map((event) => event.action)).toEqual([
+      "order.demo_executed",
+      "hedge_plan.created",
+      "matches.generated",
+      "scenario.created",
+    ]);
+    expect(orders).toHaveLength(1);
+    expect(orders[0]).toMatchObject({
+      provider: "kalshi",
+      status: "filled",
+      planId: plan.id,
+      scenarioRawText:
+        "My outdoor event loses $80k if heavy rain hits Austin on Oct 12.",
+    });
+    expect(await repository.listAccountOrders(otherUser.id)).toHaveLength(0);
+  });
 });

@@ -1,5 +1,10 @@
 import { Prisma, type PrismaClient } from "@prisma/client";
 
+import {
+  createSessionToken,
+  getSessionExpiry,
+  hashSessionToken,
+} from "./demo-session";
 import type { AuditEvent, HedgeFrameRepository } from "./repository";
 import type {
   HedgePlan,
@@ -12,11 +17,143 @@ export function createPrismaRepository(
   prisma: PrismaClient,
 ): HedgeFrameRepository {
   return {
-    async saveScenario(scenario) {
+    async createDemoSession(input) {
+      const now = input?.now ?? new Date();
+      const sessionToken = createSessionToken();
+      const expiresAt = getSessionExpiry(now);
+      const user = await prisma.user.create({
+        data: {
+          id: `user_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+          displayName: "Demo operator",
+          email: "demo@hedgeframe.local",
+          organization: "HedgeFrame demo workspace",
+          role: "Operator",
+          createdAt: now,
+          updatedAt: now,
+          sessions: {
+            create: {
+              id: `session_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+              tokenHash: hashSessionToken(sessionToken),
+              expiresAt,
+              createdAt: now,
+              lastSeenAt: now,
+            },
+          },
+        },
+      });
+
+      return {
+        user: userToDemoUser(user),
+        sessionToken,
+        expiresAt: expiresAt.toISOString(),
+      };
+    },
+    async getUserBySessionToken(sessionToken, input) {
+      const now = input?.now ?? new Date();
+      const session = await prisma.demoSession.findUnique({
+        where: { tokenHash: hashSessionToken(sessionToken) },
+        include: { user: true },
+      });
+
+      if (!session || session.expiresAt <= now) {
+        return null;
+      }
+
+      await prisma.demoSession.update({
+        where: { id: session.id },
+        data: { lastSeenAt: now },
+      });
+
+      return userToDemoUser(session.user);
+    },
+    async clearDemoSession(sessionToken) {
+      await prisma.demoSession.deleteMany({
+        where: { tokenHash: hashSessionToken(sessionToken) },
+      });
+    },
+    async updateUserProfile(userId, profile) {
+      const user = await prisma.user.update({
+        where: { id: userId },
+        data: profile,
+      });
+
+      return userToDemoUser(user);
+    },
+    async getAccountDashboard(userId) {
+      const user = await prisma.user.findUnique({ where: { id: userId } });
+
+      if (!user) {
+        throw new Error("Demo user not found");
+      }
+
+      const [activeScenarios, demoOrders, exposure, auditCount, auditRows] =
+        await Promise.all([
+          prisma.riskScenario.count({ where: { userId } }),
+          prisma.orderExecution.count({ where: { userId } }),
+          prisma.riskScenario.aggregate({
+            where: { userId },
+            _sum: { exposureAmount: true },
+          }),
+          prisma.auditLog.count({ where: { userId } }),
+          prisma.auditLog.findMany({
+            where: { userId },
+            orderBy: { createdAt: "desc" },
+            take: 6,
+          }),
+        ]);
+
+      return {
+        user: userToDemoUser(user),
+        metrics: {
+          activeScenarios,
+          demoOrders,
+          estimatedExposure: exposure._sum.exposureAmount ?? 0,
+          auditEvents: auditCount,
+        },
+        recentActivity: auditRows.map(auditLogToEvent),
+        nextActions: accountNextActions(),
+      };
+    },
+    async listAccountOrders(userId) {
+      const executions = await prisma.orderExecution.findMany({
+        where: { userId },
+        orderBy: { createdAt: "desc" },
+      });
+
+      return Promise.all(
+        executions.map(async (execution) => {
+          const rawResponse = JSON.parse(execution.rawResponse) as {
+            planId?: unknown;
+          };
+          const planId =
+            typeof rawResponse.planId === "string" ? rawResponse.planId : "";
+          const plan = planId
+            ? await prisma.hedgePlan.findUnique({ where: { id: planId } })
+            : null;
+          const payload = plan
+            ? (JSON.parse(plan.payloadJson) as HedgePlan)
+            : null;
+
+          return {
+            id: execution.id,
+            planId,
+            provider: execution.provider,
+            status: execution.status,
+            demo: true,
+            submittedAt: execution.createdAt.toISOString(),
+            filledQuantity: execution.filledQuantity,
+            averagePrice: execution.averagePrice,
+            scenarioRawText: payload?.scenario.rawText ?? "Scenario unavailable",
+          };
+        }),
+      );
+    },
+    async saveScenario(scenario, options) {
       await prisma.riskScenario.upsert({
         where: { id: scenario.id },
         create: {
           id: scenario.id,
+          userId: options?.userId,
           rawText: scenario.rawText,
           parsedJson: JSON.stringify(scenario),
           exposureAmount: scenario.exposureAmount,
@@ -24,6 +161,7 @@ export function createPrismaRepository(
           status: scenario.status,
         },
         update: {
+          userId: options?.userId ?? undefined,
           rawText: scenario.rawText,
           parsedJson: JSON.stringify(scenario),
           exposureAmount: scenario.exposureAmount,
@@ -129,12 +267,13 @@ export function createPrismaRepository(
         } as MatchResult;
       });
     },
-    async saveHedgePlan(plan) {
+    async saveHedgePlan(plan, options) {
       await prisma.hedgePlan.upsert({
         where: { id: plan.id },
         create: {
           id: plan.id,
           scenarioId: plan.scenario.id ?? "",
+          userId: options?.userId,
           totalBudget: plan.estimatedCost,
           targetCoverage:
             plan.scenario.targetCoverage ??
@@ -160,6 +299,7 @@ export function createPrismaRepository(
           },
         },
         update: {
+          userId: options?.userId ?? undefined,
           estimatedCost: plan.estimatedCost,
           maxPayout: plan.maxPayout,
           quoteCreatedAt: new Date(plan.quoteCreatedAt),
@@ -177,11 +317,12 @@ export function createPrismaRepository(
 
       return JSON.parse(plan.payloadJson) as HedgePlan;
     },
-    async saveOrderExecution(execution) {
+    async saveOrderExecution(execution, options) {
       try {
         await prisma.orderExecution.create({
           data: {
             id: execution.id,
+            userId: options?.userId,
             provider: execution.provider,
             filledQuantity: execution.filledQuantity,
             averagePrice: execution.averagePrice,
@@ -228,6 +369,7 @@ export function createPrismaRepository(
       const auditEvent = await prisma.auditLog.create({
         data: {
           id: `audit_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+          userId: event.userId,
           action: event.action,
           entityType: event.entityType,
           entityId: event.entityId,
@@ -249,6 +391,7 @@ export function createPrismaRepository(
 
 function auditLogToEvent(row: {
   id: string;
+  userId?: string | null;
   action: string;
   entityType: string;
   entityId: string;
@@ -257,10 +400,51 @@ function auditLogToEvent(row: {
 }): AuditEvent {
   return {
     id: row.id,
+    userId: row.userId ?? undefined,
     action: row.action,
     entityType: row.entityType,
     entityId: row.entityId,
     metadata: JSON.parse(row.metadata),
     createdAt: row.createdAt.toISOString(),
   };
+}
+
+function userToDemoUser(row: {
+  id: string;
+  displayName: string;
+  email: string;
+  organization: string;
+  role: string;
+  createdAt: Date;
+  updatedAt: Date;
+}) {
+  return {
+    id: row.id,
+    displayName: row.displayName,
+    email: row.email,
+    organization: row.organization,
+    role: row.role,
+    createdAt: row.createdAt.toISOString(),
+    updatedAt: row.updatedAt.toISOString(),
+  };
+}
+
+function accountNextActions() {
+  return [
+    {
+      title: "Map a new risk",
+      body: "Start from a plain-language worry and build a new market map.",
+      href: "/#try-scenario",
+    },
+    {
+      title: "Review demo orders",
+      body: "Check status, quantity, average price, and execution ids.",
+      href: "/account?view=orders",
+    },
+    {
+      title: "Check security boundary",
+      body: "Confirm demo-only execution, wallet status, and audit coverage.",
+      href: "/account?view=security",
+    },
+  ];
 }

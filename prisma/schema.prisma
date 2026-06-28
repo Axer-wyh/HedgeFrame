@@ -9,6 +9,7 @@ datasource db {
 
 model RiskScenario {
   id             String   @id
+  userId         String?
   rawText        String
   parsedJson     String
   exposureAmount Float
@@ -16,9 +17,37 @@ model RiskScenario {
   status         String
   createdAt      DateTime @default(now())
 
+  user         User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
   matchResults MatchResult[]
   hedgePlans   HedgePlan[]
   auditLogs    AuditLog[]
+}
+
+model User {
+  id           String   @id
+  displayName  String
+  email        String
+  organization String
+  role         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  sessions        DemoSession[]
+  scenarios       RiskScenario[]
+  hedgePlans      HedgePlan[]
+  orderExecutions OrderExecution[]
+  auditLogs       AuditLog[]
+}
+
+model DemoSession {
+  id         String   @id
+  userId     String
+  tokenHash  String   @unique
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model MarketSnapshot {
@@ -56,6 +85,7 @@ model MatchResult {
 model HedgePlan {
   id              String   @id
   scenarioId      String
+  userId          String?
   totalBudget     Float
   targetCoverage  Float
   estimatedCost   Float
@@ -67,6 +97,7 @@ model HedgePlan {
   createdAt       DateTime @default(now())
 
   scenario RiskScenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  user     User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
   legs     HedgeLeg[]
 }
 
@@ -97,6 +128,7 @@ model OrderIntent {
 model OrderExecution {
   id              String   @id
   orderIntentId   String?
+  userId          String?
   providerOrderId String?
   provider        String
   filledQuantity  Float
@@ -104,11 +136,14 @@ model OrderExecution {
   status          String
   rawResponse     String
   createdAt       DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 }
 
 model AuditLog {
   id         String   @id
   scenarioId String?
+  userId     String?
   action     String
   entityType String
   entityId   String
@@ -116,4 +151,5 @@ model AuditLog {
   createdAt  DateTime @default(now())
 
   scenario RiskScenario? @relation(fields: [scenarioId], references: [id], onDelete: SetNull)
+  user     User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
 }

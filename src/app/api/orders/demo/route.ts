@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { getOptionalDemoUser } from "@/lib/app/account-route-utils";
 import { apiErrorResponse, parseJsonBody } from "@/lib/app/api-utils";
 import { createDemoOrder } from "@/lib/app/hedgeframe-service";
 import { getRepository } from "@/lib/app/repository-factory";
@@ -23,7 +24,12 @@ export async function POST(request: Request) {
   }
 
   try {
-    const execution = await createDemoOrder(getRepository(), payload.data);
+    const repository = getRepository();
+    const user = await getOptionalDemoUser(repository, request);
+    const execution = await createDemoOrder(repository, {
+      ...payload.data,
+      userId: user?.id,
+    });
     return NextResponse.json({ execution }, { status: 201 });
   } catch (error) {
     return apiErrorResponse(error, "Unable to execute demo order.");

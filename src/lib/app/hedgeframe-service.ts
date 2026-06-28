@@ -33,7 +33,7 @@ type ScenarioOverrides = Partial<
 
 export async function createScenario(
   repository: HedgeFrameRepository,
-  input: { rawText: string; overrides?: ScenarioOverrides },
+  input: { rawText: string; overrides?: ScenarioOverrides; userId?: string },
 ): Promise<RiskScenario & { id: string }> {
   const parsed = parseScenario(input.rawText);
   const scenario = {
@@ -42,8 +42,9 @@ export async function createScenario(
     id: createStableId("scenario", input.rawText),
   };
 
-  await repository.saveScenario(scenario);
+  await repository.saveScenario(scenario, { userId: input.userId });
   await repository.addAuditEvent({
+    userId: input.userId,
     action: "scenario.created",
     entityType: "risk_scenario",
     entityId: scenario.id,
@@ -56,6 +57,7 @@ export async function createScenario(
 export async function getScenarioMatches(
   repository: HedgeFrameRepository,
   scenarioId: string,
+  options: { userId?: string } = {},
 ) {
   const scenario = await requireScenario(repository, scenarioId);
   const existingMatches = await repository.getMatches(scenarioId);
@@ -67,6 +69,7 @@ export async function getScenarioMatches(
   const matches = rankMarketsForScenario(scenario, mockMarkets);
   await repository.saveMatches(scenarioId, matches);
   await repository.addAuditEvent({
+    userId: options.userId,
     action: "matches.generated",
     entityType: "risk_scenario",
     entityId: scenarioId,
@@ -87,10 +90,13 @@ export async function createHedgePlan(
     budget: number;
     targetCoverage: number;
     now?: Date;
+    userId?: string;
   },
 ): Promise<HedgePlan> {
   const scenario = await requireScenario(repository, input.scenarioId);
-  const matches = await getScenarioMatches(repository, input.scenarioId);
+  const matches = await getScenarioMatches(repository, input.scenarioId, {
+    userId: input.userId,
+  });
   const selectedMatches = matches.filter((match) =>
     input.marketIds.includes(match.market.id),
   );
@@ -102,8 +108,9 @@ export async function createHedgePlan(
     now: input.now,
   });
 
-  await repository.saveHedgePlan(plan);
+  await repository.saveHedgePlan(plan, { userId: input.userId });
   await repository.addAuditEvent({
+    userId: input.userId,
     action: "hedge_plan.created",
     entityType: "hedge_plan",
     entityId: plan.id,
@@ -125,6 +132,7 @@ export async function createDemoOrder(
     confirmationText: string;
     idempotencyKey: string;
     latestMarkets?: MarketCandidate[];
+    userId?: string;
   },
 ): Promise<OrderExecution> {
   const plan = await repository.getHedgePlan(input.planId);
@@ -152,7 +160,9 @@ export async function createDemoOrder(
     ? await attachKalshiDemoResponse(execution, plan.legs[0], input.idempotencyKey)
     : execution;
 
-  const created = await repository.saveOrderExecution(executionWithProviderResponse);
+  const created = await repository.saveOrderExecution(executionWithProviderResponse, {
+    userId: input.userId,
+  });
 
   if (!created) {
     return (
@@ -162,6 +172,7 @@ export async function createDemoOrder(
   }
 
   await repository.addAuditEvent({
+    userId: input.userId,
     action: "order.demo_executed",
     entityType: "order_execution",
     entityId: execution.id,

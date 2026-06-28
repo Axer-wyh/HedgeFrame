@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { getOptionalDemoUser } from "@/lib/app/account-route-utils";
 import { apiErrorResponse, parseJsonBody } from "@/lib/app/api-utils";
 import { createScenario } from "@/lib/app/hedgeframe-service";
 import { getRepository } from "@/lib/app/repository-factory";
@@ -37,7 +38,12 @@ export async function POST(request: Request) {
   }
 
   try {
-    const scenario = await createScenario(getRepository(), payload.data);
+    const repository = getRepository();
+    const user = await getOptionalDemoUser(repository, request);
+    const scenario = await createScenario(repository, {
+      ...payload.data,
+      userId: user?.id,
+    });
     return NextResponse.json({ scenario }, { status: 201 });
   } catch (error) {
     return apiErrorResponse(error, "Unable to create scenario.");

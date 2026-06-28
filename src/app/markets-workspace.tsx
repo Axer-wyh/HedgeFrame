@@ -9,16 +9,15 @@ import {
   Clock,
   Database,
   Funnel,
-  LockKey,
   MagnifyingGlass,
   ShieldWarning,
-  Wallet,
   WarningDiamond,
   X,
 } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { AccountNav } from "./account-nav";
 import { IdentityPanel, type IdentityPanelMode } from "./identity-panel";
 import { AnimatedTabs, DecryptedText, Reveal, SuccessRipple } from "./motion-primitives";
 import type {
@@ -298,24 +297,7 @@ export function MarketsWorkspace({ initialScenario }: { initialScenario?: string
               </h1>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setIdentityPanel("login")}
-              className="hidden h-10 items-center gap-2 rounded-[8px] border border-[rgb(var(--hf-line-strong))] px-3 text-sm text-[rgb(var(--hf-text))] transition hover:bg-[rgb(var(--hf-panel))] active:translate-y-px sm:inline-flex"
-            >
-              <LockKey size={15} />
-              Log in
-            </button>
-            <button
-              type="button"
-              onClick={() => setIdentityPanel("wallet")}
-              className="inline-flex h-10 items-center gap-2 rounded-[8px] bg-[rgb(var(--hf-accent))] px-3 text-sm font-semibold text-[rgb(var(--hf-ink))] transition hover:bg-[rgb(var(--hf-accent-soft))] active:translate-y-px"
-            >
-              <Wallet size={15} weight="bold" />
-              Connect wallet
-            </button>
-          </div>
+          <AccountNav onLogin={() => setIdentityPanel("login")} />
         </header>
 
         <section className="grid flex-1 gap-4 py-4 lg:grid-cols-[330px_minmax(0,1fr)]">
