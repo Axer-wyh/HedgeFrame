@@ -14,12 +14,11 @@ import {
   WarningDiamond,
   X,
 } from "@phosphor-icons/react";
-import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { AccountNav } from "./account-nav";
 import { IdentityPanel, type IdentityPanelMode } from "./identity-panel";
 import { AnimatedTabs, DecryptedText, Reveal, SuccessRipple } from "./motion-primitives";
+import { SiteHeader, type SiteTone } from "./site-header";
 import type {
   HedgePlan,
   MarketCandidate,
@@ -68,6 +67,7 @@ export function MarketsWorkspace({ initialScenario }: { initialScenario?: string
   const [planOpen, setPlanOpen] = useState(false);
   const [identityPanel, setIdentityPanel] = useState<IdentityPanelMode | null>(null);
   const [page, setPage] = useState(1);
+  const [tone, setTone] = useState<SiteTone>("dark");
   const hasAutoRun = useRef(false);
 
   const executableMatches = useMemo(
@@ -277,29 +277,16 @@ export function MarketsWorkspace({ initialScenario }: { initialScenario?: string
   }
 
   return (
-    <main className="min-h-[100dvh] bg-[rgb(var(--hf-bg))] pb-24 text-[rgb(var(--hf-text))]">
-      <div className="mx-auto flex min-h-[100dvh] max-w-[1680px] flex-col px-4 py-4 sm:px-6 lg:px-8">
-        <header className="flex min-h-16 flex-wrap items-center justify-between gap-3 border-b border-[rgb(var(--hf-line))] pb-4">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-[8px] border border-[rgb(var(--hf-line))] text-[rgb(var(--hf-muted))] transition hover:text-[rgb(var(--hf-text))]"
-              aria-label="Back to home"
-            >
-              <ArrowLeft size={18} />
-            </Link>
-            <div>
-              <p className="font-mono text-xs text-[rgb(var(--hf-accent))]">
-                Portfolio workspace
-              </p>
-              <h1 className="text-xl font-semibold tracking-[-0.02em] sm:text-2xl">
-                Prediction market candidates
-              </h1>
-            </div>
-          </div>
-          <AccountNav onLogin={() => setIdentityPanel("login")} />
-        </header>
-
+    <main
+      data-tone={tone}
+      className="min-h-[100dvh] bg-[rgb(var(--hf-bg))] pb-24 pt-14 text-[rgb(var(--hf-text))]"
+    >
+      <SiteHeader
+        tone={tone}
+        onToneToggle={() => setTone((value) => (value === "dark" ? "light" : "dark"))}
+        onLogin={() => setIdentityPanel("login")}
+      />
+      <div className="mx-auto flex min-h-[calc(100dvh-3.5rem)] max-w-[1680px] flex-col px-4 py-4 sm:px-6 lg:px-8">
         <section className="grid flex-1 gap-4 py-4 lg:grid-cols-[330px_minmax(0,1fr)]">
           <aside className="space-y-4">
             <ScenarioPanel

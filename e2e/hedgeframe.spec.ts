@@ -64,7 +64,11 @@ test("weather event user can create and execute a Kalshi demo hedge", async ({
 
   await page.getByRole("button", { name: "Map this scenario" }).click();
   await expect(page).toHaveURL(/\/markets/);
-  await expect(page.getByText("Portfolio workspace")).toBeVisible();
+  await expect(page.getByRole("link", { name: "HedgeFrame", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "How it works" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Use cases" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Markets" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Back to home" })).toHaveCount(0);
   await expect(page.getByText("Will Austin record heavy rain")).toBeVisible();
   await expect(page.getByRole("button", { name: "Kalshi demo" })).toBeVisible();
   await expect(page.getByText("demo ready").first()).toBeVisible();
@@ -155,6 +159,9 @@ test("weather event user can create and execute a Kalshi demo hedge", async ({
 
   await expect(page.getByText(/Demo execution filled/)).toBeVisible();
   await page.goto("/account?view=orders");
+  await expect(page.getByRole("link", { name: "HedgeFrame", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Markets" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Back to home" })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "My orders" })).toBeVisible();
   await expect(page.getByText("My outdoor event loses $80k")).toBeVisible();
   await expect(page.getByText("filled", { exact: true })).toBeVisible();

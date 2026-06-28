@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  ArrowLeft,
   CheckCircle,
   Database,
   Fingerprint,
@@ -16,9 +15,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 
-import { AccountNav } from "./account-nav";
 import { type CurrentDemoUser, useCurrentDemoUser } from "./demo-auth-client";
 import { IdentityPanel } from "./identity-panel";
+import { SiteHeader, type SiteTone } from "./site-header";
 
 type AccountView = "dashboard" | "profile" | "security" | "orders";
 
@@ -75,7 +74,10 @@ export function AccountPage() {
   const [dashboard, setDashboard] = useState<DashboardPayload | null>(null);
   const [orders, setOrders] = useState<OrderSummary[]>([]);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const [tone, setTone] = useState<SiteTone>("dark");
   const view = parseView(searchParams.get("view"));
+  const toggleTone = () =>
+    setTone((value) => (value === "dark" ? "light" : "dark"));
   const selectedOrder = useMemo(
     () => orders.find((order) => order.id === selectedOrderId) ?? orders[0] ?? null,
     [orders, selectedOrderId],
@@ -123,13 +125,30 @@ export function AccountPage() {
   }
 
   if (loading) {
-    return <AccountShell title="Account" view={view} onViewChange={setView} />;
+    return (
+      <AccountShell
+        title="Account"
+        view={view}
+        tone={tone}
+        onToneToggle={toggleTone}
+        onLogin={() => setIdentityOpen(true)}
+        onViewChange={setView}
+      />
+    );
   }
 
   if (!user) {
     return (
-      <main className="min-h-[100dvh] bg-[rgb(var(--hf-bg))] text-[rgb(var(--hf-text))]">
-        <div className="mx-auto flex min-h-[100dvh] max-w-[1180px] items-center justify-center px-6">
+      <main
+        data-tone={tone}
+        className="min-h-[100dvh] bg-[rgb(var(--hf-bg))] pt-14 text-[rgb(var(--hf-text))]"
+      >
+        <SiteHeader
+          tone={tone}
+          onToneToggle={toggleTone}
+          onLogin={() => setIdentityOpen(true)}
+        />
+        <div className="mx-auto flex min-h-[calc(100dvh-3.5rem)] max-w-[1180px] items-center justify-center px-6">
           <section className="w-full max-w-lg rounded-[16px] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel))] p-6">
             <div className="flex h-12 w-12 items-center justify-center rounded-[12px] border border-[rgb(var(--hf-line))] text-[rgb(var(--hf-accent))]">
               <Fingerprint size={22} />
@@ -165,8 +184,10 @@ export function AccountPage() {
     <AccountShell
       title={viewTitle(view)}
       view={view}
+      tone={tone}
+      onToneToggle={toggleTone}
+      onLogin={() => setIdentityOpen(true)}
       onViewChange={setView}
-      rightAction={<AccountNav onLogin={() => setIdentityOpen(true)} />}
     >
       {view === "dashboard" ? <DashboardView dashboard={dashboard} /> : null}
       {view === "profile" ? (
@@ -194,40 +215,35 @@ export function AccountPage() {
 function AccountShell({
   title,
   view,
+  tone,
+  onToneToggle,
+  onLogin,
   onViewChange,
-  rightAction,
   children,
 }: {
   title: string;
   view: AccountView;
+  tone: SiteTone;
+  onToneToggle: () => void;
+  onLogin: () => void;
   onViewChange: (view: AccountView) => void;
-  rightAction?: ReactNode;
   children?: ReactNode;
 }) {
   return (
-    <main className="min-h-[100dvh] bg-[rgb(var(--hf-bg))] text-[rgb(var(--hf-text))]">
-      <div className="mx-auto flex min-h-[100dvh] max-w-[1500px] flex-col px-4 py-4 sm:px-6 lg:px-8">
-        <header className="flex min-h-16 flex-wrap items-center justify-between gap-3 border-b border-[rgb(var(--hf-line))] pb-4">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              aria-label="Back to home"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-[8px] border border-[rgb(var(--hf-line))] text-[rgb(var(--hf-muted))] transition hover:text-[rgb(var(--hf-text))]"
-            >
-              <ArrowLeft size={18} />
-            </Link>
-            <div>
-              <p className="font-mono text-xs text-[rgb(var(--hf-accent))]">
-                Account workspace
-              </p>
-              <h1 className="text-xl font-semibold tracking-[-0.02em] sm:text-2xl">
-                {title}
-              </h1>
-            </div>
-          </div>
-          {rightAction}
-        </header>
-
+    <main
+      data-tone={tone}
+      className="min-h-[100dvh] bg-[rgb(var(--hf-bg))] pt-14 text-[rgb(var(--hf-text))]"
+    >
+      <SiteHeader tone={tone} onToneToggle={onToneToggle} onLogin={onLogin} />
+      <div className="mx-auto flex min-h-[calc(100dvh-3.5rem)] max-w-[1500px] flex-col px-4 py-4 sm:px-6 lg:px-8">
+        <div className="border-b border-[rgb(var(--hf-line))] pb-4">
+          <p className="font-mono text-xs text-[rgb(var(--hf-accent))]">
+            Account workspace
+          </p>
+          <h1 className="text-xl font-semibold tracking-[-0.02em] sm:text-2xl">
+            {title}
+          </h1>
+        </div>
         <section className="grid flex-1 gap-4 py-4 lg:grid-cols-[260px_minmax(0,1fr)]">
           <aside className="rounded-[16px] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel))] p-2">
             {views.map((item) => (
