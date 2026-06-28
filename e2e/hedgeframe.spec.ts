@@ -45,6 +45,27 @@ test("weather event user can create and execute a Kalshi demo hedge", async ({
   await expect(partnerRail.getByRole("link", { name: "Kalshi" }).first()).toBeVisible();
   await expect(partnerRail.getByRole("link", { name: "Polymarket" }).first()).toBeVisible();
   await page.setViewportSize({ width: 1833, height: 1027 });
+  await expect(page.getByText("Platform rails")).toHaveCount(0);
+  await expect(
+    page.getByText("Built around public market, settlement, wallet, and deployment infrastructure."),
+  ).toHaveCount(0);
+  const platformRailLayout = await partnerRail
+    .getByRole("link", { name: "Kalshi" })
+    .first()
+    .evaluate((link) => {
+      const rail = link.closest('[role="region"]');
+      const railRect = rail?.getBoundingClientRect();
+      const linkRect = link.getBoundingClientRect();
+
+      return {
+        railHeight: railRect?.height ?? 0,
+        tileHeight: linkRect.height,
+        tileWidth: linkRect.width,
+      };
+    });
+  expect(platformRailLayout.railHeight).toBeGreaterThanOrEqual(180);
+  expect(platformRailLayout.tileHeight).toBeGreaterThanOrEqual(96);
+  expect(platformRailLayout.tileWidth).toBeGreaterThanOrEqual(220);
   await expect(page.getByText("Outdoor wedding planner")).toBeVisible();
   await expect(page.getByText("Trust before execution.")).toBeVisible();
   await expect(page.getByText("For people carrying weird risk.")).toBeVisible();

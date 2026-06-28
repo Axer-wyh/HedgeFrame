@@ -645,28 +645,21 @@ function HowItWorks() {
           ))}
         </div>
       </div>
-      <div className="grid grid-cols-[360px_minmax(0,1fr)] border-t border-[rgb(var(--hf-line))]">
-        <div className="border-r border-[rgb(var(--hf-line))] px-10 py-6">
-          <p className="font-mono text-xs uppercase tracking-[0.12em] text-[rgb(var(--hf-accent))]">
-            Platform rails
-          </p>
-          <p className="mt-2 max-w-[31ch] text-sm leading-6 text-[rgb(var(--hf-muted))]">
-            Built around public market, settlement, wallet, and deployment
-            infrastructure.
-          </p>
-        </div>
-        <div className="flex min-w-0 items-center overflow-hidden px-4 py-6">
+      <div className="border-t border-[rgb(var(--hf-line))]">
+        <div className="flex min-h-[190px] min-w-0 items-center overflow-hidden py-8">
           <LogoLoop
             logos={platformLogos}
-            speed={86}
+            speed={82}
             direction="left"
-            logoHeight={42}
-            gap={24}
+            logoHeight={88}
+            gap={0}
             hoverSpeed={0}
             scaleOnHover
             fadeOut
             fadeOutColor="rgb(var(--hf-bg))"
             ariaLabel="Market infrastructure platforms"
+            className="flex items-center"
+            style={{ height: 190 }}
           />
         </div>
       </div>
@@ -676,11 +669,11 @@ function HowItWorks() {
 
 function PlatformLogo({ code, name }: { code: string; name: string }) {
   return (
-    <span className="inline-flex h-12 items-center gap-3 border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel))] px-4 text-[rgb(var(--hf-text))] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-      <span className="grid h-7 w-7 place-items-center bg-[rgb(var(--hf-accent))] font-mono text-xs font-semibold text-[rgb(var(--hf-ink))]">
+    <span className="inline-flex h-28 min-w-[250px] items-center justify-center gap-5 border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel))] px-8 text-[rgb(var(--hf-text))] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+      <span className="grid h-10 w-10 place-items-center bg-[rgb(var(--hf-accent))] font-mono text-sm font-semibold text-[rgb(var(--hf-ink))]">
         {code}
       </span>
-      <span className="text-base font-semibold tracking-[-0.02em]">{name}</span>
+      <span className="text-xl font-semibold tracking-[-0.03em]">{name}</span>
     </span>
   );
 }
