@@ -752,7 +752,9 @@ function BottomPrompt({
         <p className="mx-auto max-w-[52ch] text-base leading-7 text-[rgb(var(--hf-muted))]">
           Start with the thing that could hurt your calendar, cash flow, or route. HedgeFrame maps what can be matched and what should be blocked.
         </p>
-        <PromptBox rawText={rawText} onRawTextChange={onRawTextChange} onSubmit={onSubmit} />
+        <div data-bottom-prompt className="mx-auto w-full max-w-[760px]">
+          <PromptBox rawText={rawText} onRawTextChange={onRawTextChange} onSubmit={onSubmit} />
+        </div>
       </div>
     </section>
   );

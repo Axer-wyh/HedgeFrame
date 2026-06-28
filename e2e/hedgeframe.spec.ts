@@ -41,6 +41,16 @@ test("weather event user can create and execute a Kalshi demo hedge", async ({
     )
     .toBeGreaterThan(0.9);
   await expect(page.getByRole("button", { name: "Map markets" }).first()).toBeVisible();
+  const heroPromptWidth = await page
+    .locator("[data-hero-prompt]")
+    .evaluate((element) => Math.round(element.getBoundingClientRect().width));
+  await page.locator("#try-scenario").scrollIntoViewIfNeeded();
+  const bottomPrompt = page.locator("[data-bottom-prompt]");
+  await expect(bottomPrompt).toBeVisible();
+  const bottomPromptWidth = await bottomPrompt.evaluate((element) =>
+    Math.round(element.getBoundingClientRect().width),
+  );
+  expect(Math.abs(bottomPromptWidth - heroPromptWidth)).toBeLessThanOrEqual(2);
   await page.evaluate(() => window.scrollTo(0, 0));
 
   await page.getByRole("button", { name: "Map this scenario" }).click();
