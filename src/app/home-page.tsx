@@ -444,10 +444,10 @@ function PinnedHero({
             </p>
             <h1
               aria-label={heroTitle}
-              className="max-w-[960px] text-[clamp(64px,5.9vw,96px)] font-semibold leading-[0.9] tracking-[-0.08em]"
+              className="max-w-[1280px] text-[clamp(54px,4.9vw,90px)] font-semibold leading-[0.9] tracking-[-0.08em]"
             >
-              <span className="block">{heroTitlePrimary}</span>
-              <span className="block">{heroTitleSecondary}</span>
+              <span className="block whitespace-nowrap">{heroTitlePrimary}</span>
+              <span className="block whitespace-nowrap">{heroTitleSecondary}</span>
             </h1>
             <p className="mt-7 max-w-[640px] text-lg leading-7 text-[rgb(var(--hf-muted))]">
               {heroSubtitle}

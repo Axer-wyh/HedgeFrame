@@ -11,6 +11,15 @@ test("weather event user can create and execute a Kalshi demo hedge", async ({
       name: "Name what you're afraid of. We'll find the hedge.",
     }),
   ).toBeVisible();
+  await expect
+    .poll(async () =>
+      page.getByText("Name what you're afraid of.", { exact: true }).evaluate((node) => {
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        return Array.from(range.getClientRects()).filter((rect) => rect.width > 1).length;
+      }),
+    )
+    .toBe(1);
   await expect(page.getByText("Say what you're worried about.")).toBeVisible();
   const header = page.locator("header");
   await expect(header.getByRole("link", { name: "How it works" })).toBeVisible();
