@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
 import { IdentityPanel, type IdentityPanelMode } from "./identity-panel";
+import { LogoLoop, type LogoItem } from "./logo-loop";
 import { DecryptedText, Reveal } from "./motion-primitives";
 import { BrandMark, SiteHeader, type SiteTone } from "./site-header";
 
@@ -84,6 +85,51 @@ const scenarios = [
     outcome: "Show low-confidence markets, basis risk, and the no-trade reason.",
     state: "low confidence",
     example: "Middle East crude shipping route faces disruption next quarter.",
+  },
+];
+
+const platformLogos: LogoItem[] = [
+  {
+    node: <PlatformLogo code="K" name="Kalshi" />,
+    title: "Kalshi",
+    ariaLabel: "Kalshi",
+    href: "https://kalshi.com",
+  },
+  {
+    node: <PlatformLogo code="P" name="Polymarket" />,
+    title: "Polymarket",
+    ariaLabel: "Polymarket",
+    href: "https://polymarket.com",
+  },
+  {
+    node: <PlatformLogo code="$" name="USDC" />,
+    title: "USDC",
+    ariaLabel: "USDC",
+    href: "https://www.circle.com/usdc",
+  },
+  {
+    node: <PlatformLogo code="W" name="WalletConnect" />,
+    title: "WalletConnect",
+    ariaLabel: "WalletConnect",
+    href: "https://walletconnect.network",
+  },
+  {
+    node: <PlatformLogo code="C" name="Chainlink" />,
+    title: "Chainlink",
+    ariaLabel: "Chainlink",
+    href: "https://chain.link",
+  },
+  {
+    node: <PlatformLogo code="V" name="Vercel" />,
+    title: "Vercel",
+    ariaLabel: "Vercel",
+    href: "https://vercel.com",
+  },
+  {
+    node: <PlatformLogo code="N" name="Next.js" />,
+    title: "Next.js",
+    ariaLabel: "Next.js",
+    href: "https://nextjs.org",
   },
 ];
 
@@ -465,7 +511,43 @@ function HowItWorks() {
           ))}
         </div>
       </div>
+      <div className="grid grid-cols-[360px_minmax(0,1fr)] border-t border-[rgb(var(--hf-line))]">
+        <div className="border-r border-[rgb(var(--hf-line))] px-10 py-6">
+          <p className="font-mono text-xs uppercase tracking-[0.12em] text-[rgb(var(--hf-accent))]">
+            Platform rails
+          </p>
+          <p className="mt-2 max-w-[31ch] text-sm leading-6 text-[rgb(var(--hf-muted))]">
+            Built around public market, settlement, wallet, and deployment
+            infrastructure.
+          </p>
+        </div>
+        <div className="flex min-w-0 items-center overflow-hidden px-4 py-6">
+          <LogoLoop
+            logos={platformLogos}
+            speed={86}
+            direction="left"
+            logoHeight={42}
+            gap={24}
+            hoverSpeed={0}
+            scaleOnHover
+            fadeOut
+            fadeOutColor="rgb(var(--hf-bg))"
+            ariaLabel="Market infrastructure platforms"
+          />
+        </div>
+      </div>
     </section>
+  );
+}
+
+function PlatformLogo({ code, name }: { code: string; name: string }) {
+  return (
+    <span className="inline-flex h-12 items-center gap-3 border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel))] px-4 text-[rgb(var(--hf-text))] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+      <span className="grid h-7 w-7 place-items-center bg-[rgb(var(--hf-accent))] font-mono text-xs font-semibold text-[rgb(var(--hf-ink))]">
+        {code}
+      </span>
+      <span className="text-base font-semibold tracking-[-0.02em]">{name}</span>
+    </span>
   );
 }
 

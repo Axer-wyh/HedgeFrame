@@ -38,6 +38,12 @@ test("weather event user can create and execute a Kalshi demo hedge", async ({
   ).toBeVisible();
   await expect(page.getByText("REAL WORRY", { exact: true })).toBeVisible();
   await expect(page.getByText("From one worry to one hedge path.")).toBeVisible();
+  const partnerRail = page.getByRole("region", {
+    name: "Market infrastructure platforms",
+  });
+  await expect(partnerRail).toBeVisible();
+  await expect(partnerRail.getByRole("link", { name: "Kalshi" }).first()).toBeVisible();
+  await expect(partnerRail.getByRole("link", { name: "Polymarket" }).first()).toBeVisible();
   await expect(page.getByText("Outdoor wedding planner")).toBeVisible();
   await expect(page.getByText("For people carrying weird risk.")).toBeVisible();
 
