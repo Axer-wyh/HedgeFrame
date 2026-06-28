@@ -46,6 +46,24 @@ test("weather event user can create and execute a Kalshi demo hedge", async ({
   await expect(partnerRail.getByRole("link", { name: "Polymarket" }).first()).toBeVisible();
   await expect(page.getByText("Outdoor wedding planner")).toBeVisible();
   await expect(page.getByText("For people carrying weird risk.")).toBeVisible();
+  const riskStoriesRail = page.getByRole("region", {
+    name: "Risk stories in motion",
+  });
+  await expect(riskStoriesRail).toBeVisible();
+  await expect(riskStoriesRail.getByText("Rain weekend exposure").first()).toBeVisible();
+  await expect(riskStoriesRail.getByText("Pain").first()).toBeVisible();
+  await expect(riskStoriesRail.getByText("HedgeFrame path").first()).toBeVisible();
+  const firstRiskTransform = await riskStoriesRail
+    .locator(".logoloop__track")
+    .evaluate((element) => getComputedStyle(element).transform);
+  await page.waitForTimeout(500);
+  await expect
+    .poll(async () =>
+      riskStoriesRail
+        .locator(".logoloop__track")
+        .evaluate((element) => getComputedStyle(element).transform),
+    )
+    .not.toBe(firstRiskTransform);
 
   await page.mouse.wheel(0, 1600);
   await expect

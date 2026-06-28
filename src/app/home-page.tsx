@@ -19,7 +19,7 @@ import { useRef, useState } from "react";
 
 import { IdentityPanel, type IdentityPanelMode } from "./identity-panel";
 import { LogoLoop, type LogoItem } from "./logo-loop";
-import { DecryptedText, Reveal } from "./motion-primitives";
+import { DecryptedText } from "./motion-primitives";
 import { BrandMark, SiteHeader, type SiteTone } from "./site-header";
 
 const sampleScenario =
@@ -42,13 +42,91 @@ const promptExamples = [
   "Freight costs jump 20% in the next three months.",
 ];
 
-const userGroups = [
-  ["Event organizers", "Weather can erase a weekend of ticket revenue."],
-  ["Venue owners", "Access, attendance, and refunds can hit the same calendar week."],
-  ["SMB finance", "A budgeted exposure needs a fast, explainable hedge path."],
-  ["Logistics coordinators", "Route risk needs low-confidence signals before anyone acts."],
-  ["Brokers and advisors", "Clients need basis risk explained in plain language."],
-  ["Risk ops", "Repeatable audit trails matter as much as the quote."],
+const riskStories: LogoItem[] = [
+  {
+    node: (
+      <RiskStoryCard
+        persona="Event operator"
+        title="Rain weekend exposure"
+        pain="A two-day storm can erase ticket sales, vendor deposits, and staffing costs."
+        path="Map local weather contracts, size a demo hedge, and show what remains exposed."
+        outcome="A decision path before the forecast turns into a cash problem."
+      />
+    ),
+    title: "Rain weekend exposure",
+  },
+  {
+    node: (
+      <RiskStoryCard
+        persona="Venue owner"
+        title="Closure weekend risk"
+        pain="Access disruption can cut attendance while refunds and fixed costs keep running."
+        path="Compare event, weather, and transit-linked markets with basis risk notes."
+        outcome="Know which contracts help and which should be blocked."
+      />
+    ),
+    title: "Closure weekend risk",
+  },
+  {
+    node: (
+      <RiskStoryCard
+        persona="SMB finance"
+        title="Freight margin squeeze"
+        pain="A fixed-price order can become unprofitable when freight costs move too fast."
+        path="Surface freight, inflation, and route proxies, then rank them by fit."
+        outcome="A budgeted hedge plan instead of a guess at the next invoice."
+      />
+    ),
+    title: "Freight margin squeeze",
+  },
+  {
+    node: (
+      <RiskStoryCard
+        persona="Wedding planner"
+        title="Outdoor refund day"
+        pain="A single rain date can turn deposits, staff, and client refunds into one loss event."
+        path="Translate the date, venue, trigger, budget, and target coverage into candidate markets."
+        outcome="A plain-language view of cost, payout, slippage, and mismatch."
+      />
+    ),
+    title: "Outdoor refund day",
+  },
+  {
+    node: (
+      <RiskStoryCard
+        persona="Route coordinator"
+        title="Shipping disruption"
+        pain="A geopolitical delay may hurt cargo economics without a direct market match."
+        path="Show low-confidence proxies, settlement gaps, and no-trade reasons."
+        outcome="A documented basis risk call before anyone clicks confirm."
+      />
+    ),
+    title: "Shipping disruption",
+  },
+  {
+    node: (
+      <RiskStoryCard
+        persona="Broker advisor"
+        title="Client basis risk"
+        pain="Clients ask for certainty when the market only settles on a narrow rule."
+        path="Explain what the contract covers, what it misses, and why the score changed."
+        outcome="A recommendation that can be reviewed instead of hand-waved."
+      />
+    ),
+    title: "Client basis risk",
+  },
+  {
+    node: (
+      <RiskStoryCard
+        persona="Risk ops"
+        title="Repeatable audit trail"
+        pain="One-off screenshots and chats make hedge decisions hard to reconstruct later."
+        path="Store scenario input, match logic, quote snapshot, order intent, and execution response."
+        outcome="A reviewable trail for every demo execution decision."
+      />
+    ),
+    title: "Repeatable audit trail",
+  },
 ];
 
 const howItWorks = [
@@ -442,33 +520,88 @@ function PromptBox({
 
 function AudienceGrid() {
   return (
-    <section className="border-b border-[rgb(var(--hf-line))]">
-      <div className="grid grid-cols-3">
-        <div className="border-r border-[rgb(var(--hf-line))] p-10">
-          <h2 className="text-6xl font-semibold leading-none tracking-[-0.07em]">
+    <section className="overflow-hidden border-b border-[rgb(var(--hf-line))]">
+      <div className="grid min-h-[520px] grid-cols-[430px_minmax(0,1fr)]">
+        <div className="flex flex-col justify-between border-r border-[rgb(var(--hf-line))] p-10">
+          <div>
+            <h2 className="text-6xl font-semibold leading-none">
             For people carrying weird risk.
-          </h2>
-          <p className="mt-6 max-w-[34ch] text-base leading-7 text-[rgb(var(--hf-muted))]">
-            The old path starts with forms and underwriting language. HedgeFrame starts with the worry in your own words.
-          </p>
+            </h2>
+            <p className="mt-6 max-w-[34ch] text-base leading-7 text-[rgb(var(--hf-muted))]">
+              The old path starts with forms and underwriting language.
+              HedgeFrame starts with the worry in your own words.
+            </p>
+          </div>
+          <div className="max-w-[31ch] border-l border-[rgb(var(--hf-accent))] pl-4 text-sm leading-6 text-[rgb(var(--hf-text))]">
+            Real operators bring messy exposure. The product turns it into a
+            ranked hedge path with explicit basis risk.
+          </div>
         </div>
-        <div className="col-span-2 grid grid-cols-3">
-          {userGroups.map(([title, body], index) => (
-            <Reveal
-              key={title}
-              delay={index * 0.03}
-              className="min-h-56 border-b border-r border-[rgb(var(--hf-line))] p-6"
-            >
-              <div className="mb-10 inline-flex border border-[rgb(var(--hf-line))] px-2 py-1 font-mono text-xs text-[rgb(var(--hf-accent))]">
-                Hedge path
-              </div>
-              <h3 className="text-2xl font-semibold tracking-[-0.04em]">{title}</h3>
-              <p className="mt-3 text-sm leading-6 text-[rgb(var(--hf-muted))]">{body}</p>
-            </Reveal>
-          ))}
+        <div className="flex min-w-0 items-center overflow-hidden">
+          <LogoLoop
+            logos={riskStories}
+            speed={44}
+            direction="left"
+            logoHeight={1}
+            gap={22}
+            hoverSpeed={8}
+            fadeOut
+            fadeOutColor="rgb(var(--hf-bg))"
+            ariaLabel="Risk stories in motion"
+            className="py-10"
+          />
         </div>
       </div>
     </section>
+  );
+}
+
+function RiskStoryCard({
+  persona,
+  title,
+  pain,
+  path,
+  outcome,
+}: {
+  persona: string;
+  title: string;
+  pain: string;
+  path: string;
+  outcome: string;
+}) {
+  return (
+    <article className="grid h-[320px] w-[390px] grid-rows-[auto_1fr_auto] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel))] p-5 text-base shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+      <div>
+        <div className="mb-5 flex items-center justify-between gap-4">
+          <span className="font-mono text-xs text-[rgb(var(--hf-muted))]">
+            {persona}
+          </span>
+          <span className="border border-[rgb(var(--hf-line))] px-2 py-1 font-mono text-xs text-[rgb(var(--hf-accent))]">
+            Hedge path
+          </span>
+        </div>
+        <h3 className="max-w-[15ch] text-3xl font-semibold leading-none">
+          {title}
+        </h3>
+      </div>
+
+      <div className="mt-5 grid gap-3">
+        <div className="border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-field))] p-3">
+          <p className="font-mono text-xs text-[rgb(var(--hf-warning))]">Pain</p>
+          <p className="mt-2 text-sm leading-6 text-[rgb(var(--hf-muted))]">{pain}</p>
+        </div>
+        <div className="border border-[rgb(var(--hf-accent))]/45 bg-[rgb(var(--hf-accent))]/10 p-3">
+          <p className="font-mono text-xs text-[rgb(var(--hf-accent))]">
+            HedgeFrame path
+          </p>
+          <p className="mt-2 text-sm leading-6 text-[rgb(var(--hf-text))]">{path}</p>
+        </div>
+      </div>
+
+      <p className="mt-4 border-t border-[rgb(var(--hf-line))] pt-3 text-sm leading-5 text-[rgb(var(--hf-muted))]">
+        {outcome}
+      </p>
+    </article>
   );
 }
 

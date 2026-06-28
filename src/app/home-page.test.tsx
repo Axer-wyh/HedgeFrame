@@ -40,6 +40,11 @@ describe("HomePage", () => {
     expect(screen.getByText("We'll also tell you when a hedge isn't worth it.")).toBeInTheDocument();
     expect(screen.getByText("Outdoor wedding planner")).toBeInTheDocument();
     expect(screen.getByText("For people carrying weird risk.")).toBeInTheDocument();
+    expect(
+      screen.getByRole("region", { name: "Risk stories in motion" }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText("Rain weekend exposure").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("HedgeFrame path").length).toBeGreaterThan(0);
     expect(screen.getByText(/Trust before execution/)).toBeInTheDocument();
     expect(screen.getAllByText(/Not insurance/i).length).toBeGreaterThan(0);
     expect(screen.getByText("Making hedging a part of your life.")).toBeInTheDocument();
