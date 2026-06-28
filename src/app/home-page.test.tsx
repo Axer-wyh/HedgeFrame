@@ -28,7 +28,9 @@ describe("HomePage", () => {
     const header = within(screen.getByRole("banner"));
     expect(header.getByRole("link", { name: "How it works" })).toBeInTheDocument();
     expect(header.getByRole("link", { name: "Use cases" })).toBeInTheDocument();
-    expect(header.getByRole("button", { name: /Markets/ })).toBeInTheDocument();
+    const marketsLink = header.getByRole("link", { name: "Markets" });
+    expect(marketsLink).toHaveAttribute("href", "/markets");
+    expect(header.queryByRole("button", { name: /Markets/ })).not.toBeInTheDocument();
     expect(header.getByRole("button", { name: "Log in" })).toBeInTheDocument();
     expect(header.queryByRole("button", { name: "Connect wallet" })).not.toBeInTheDocument();
     expect(header.getByRole("link", { name: "Try a scenario" })).toBeInTheDocument();

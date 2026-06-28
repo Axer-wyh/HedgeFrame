@@ -24,7 +24,10 @@ test("weather event user can create and execute a Kalshi demo hedge", async ({
   const header = page.locator("header");
   await expect(header.getByRole("link", { name: "How it works" })).toBeVisible();
   await expect(header.getByRole("link", { name: "Use cases" })).toBeVisible();
-  await expect(header.getByRole("button", { name: /Markets/ })).toBeVisible();
+  const marketsLink = header.getByRole("link", { name: "Markets" });
+  await expect(marketsLink).toBeVisible();
+  await expect(marketsLink).toHaveAttribute("href", "/markets");
+  await expect(header.getByRole("button", { name: /Markets/ })).toHaveCount(0);
   await expect(header.getByRole("link", { name: "Try a scenario" })).toBeVisible();
   await expect(header.getByRole("button", { name: "Connect wallet" })).toHaveCount(0);
   await expect(page.getByText("REAL WORRY", { exact: true })).toBeVisible();

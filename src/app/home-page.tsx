@@ -2,7 +2,6 @@
 
 import {
   ArrowRight,
-  CaretDown,
   Check,
   CloudRain,
   GlobeHemisphereWest,
@@ -37,13 +36,6 @@ const heroEyebrow = "Say what you're worried about.";
 const visionLinePrimary = "Plain-words worry to";
 const visionLineSecondary = "executable hedge.";
 const visionLine = `${visionLinePrimary} ${visionLineSecondary}`;
-
-const marketMenu = [
-  ["Weather events", "Rain, heat, wind, and event windows matched to public contracts."],
-  ["Event revenue", "Cancellation, refunds, attendance pressure, and venue exposure."],
-  ["Shipping and freight", "Route disruption and cost jumps surfaced with clear confidence."],
-  ["Audit and limits", "Why it matches, why it may not, and when execution is blocked."],
-];
 
 const promptExamples = [
   "My outdoor event loses $80k if heavy rain hits Austin on Oct 12.",
@@ -102,7 +94,6 @@ export function HomePage() {
   const router = useRouter();
   const [rawText, setRawText] = useState(sampleScenario);
   const [identityPanel, setIdentityPanel] = useState<IdentityPanelMode | null>(null);
-  const [marketsOpen, setMarketsOpen] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(false);
   const [tone, setTone] = useState<"dark" | "light">("dark");
 
@@ -127,22 +118,15 @@ export function HomePage() {
     >
       <PixelField />
       <SiteHeader
-        marketsOpen={marketsOpen}
         languageOpen={languageOpen}
         tone={tone}
-        onMarketsToggle={() => {
-          setLanguageOpen(false);
-          setMarketsOpen((open) => !open);
-        }}
         onLanguageToggle={() => {
-          setMarketsOpen(false);
           setLanguageOpen((open) => !open);
         }}
         onToneToggle={() => setTone((value) => (value === "dark" ? "light" : "dark"))}
         onLogin={() => setIdentityPanel("login")}
       />
 
-      {marketsOpen ? <MarketsMegaMenu onClose={() => setMarketsOpen(false)} /> : null}
       {languageOpen ? <LanguageMenu onClose={() => setLanguageOpen(false)} /> : null}
 
       <PinnedHero rawText={rawText} onRawTextChange={setRawText} onSubmit={submitScenario} />
@@ -161,18 +145,14 @@ export function HomePage() {
 }
 
 function SiteHeader({
-  marketsOpen,
   languageOpen,
   tone,
-  onMarketsToggle,
   onLanguageToggle,
   onToneToggle,
   onLogin,
 }: {
-  marketsOpen: boolean;
   languageOpen: boolean;
   tone: "dark" | "light";
-  onMarketsToggle: () => void;
   onLanguageToggle: () => void;
   onToneToggle: () => void;
   onLogin: () => void;
@@ -205,15 +185,12 @@ function SiteHeader({
         >
           Use cases
         </a>
-        <button
-          type="button"
-          onClick={onMarketsToggle}
-          aria-expanded={marketsOpen}
-          className="flex items-center justify-between border-l border-[rgb(var(--hf-line))] px-4 text-sm transition hover:bg-[rgb(var(--hf-panel))]"
+        <a
+          href="/markets"
+          className="flex items-center border-l border-[rgb(var(--hf-line))] px-4 text-sm transition hover:bg-[rgb(var(--hf-panel))]"
         >
           Markets
-          <CaretDown size={14} weight="bold" />
-        </button>
+        </a>
         <a
           href="#about"
           className="flex items-center border-l border-[rgb(var(--hf-line))] px-4 text-sm transition hover:bg-[rgb(var(--hf-panel))]"
@@ -253,49 +230,6 @@ function SiteHeader({
         </button>
       </div>
     </header>
-  );
-}
-
-function MarketsMegaMenu({ onClose }: { onClose: () => void }) {
-  return (
-    <div className="fixed left-0 right-0 top-14 z-40 border-b border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-bg))]/98 shadow-[0_30px_80px_rgba(0,0,0,0.35)] backdrop-blur-xl">
-      <div className="mx-auto grid max-w-[1440px] grid-cols-[1.2fr_0.8fr] border-x border-[rgb(var(--hf-line))]">
-        <div className="grid grid-cols-2">
-          {marketMenu.map(([title, body]) => (
-            <button
-              type="button"
-              key={title}
-              onClick={onClose}
-              className="min-h-36 border-b border-r border-[rgb(var(--hf-line))] p-6 text-left transition hover:bg-[rgb(var(--hf-panel))]"
-            >
-              <span className="font-mono text-xs text-[rgb(var(--hf-accent))]">user path</span>
-              <span className="mt-5 block text-2xl font-semibold tracking-[-0.03em]">
-                {title}
-              </span>
-              <span className="mt-2 block max-w-[34ch] text-sm leading-6 text-[rgb(var(--hf-muted))]">
-                {body}
-              </span>
-            </button>
-          ))}
-        </div>
-        <div className="bg-[rgb(var(--hf-panel-strong))] p-8">
-          <div className="mb-10 flex items-center gap-2 font-mono text-xs text-[rgb(var(--hf-muted))]">
-            <DecryptedText text="weather / events / freight / audit" />
-          </div>
-          <h2 className="max-w-[12ch] text-5xl font-semibold leading-none tracking-[-0.05em]">
-            Find the market before the risk window closes.
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="mt-8 inline-flex h-11 items-center gap-2 bg-[rgb(var(--hf-accent))] px-4 text-sm font-semibold text-[rgb(var(--hf-ink))] transition hover:bg-[rgb(var(--hf-accent-soft))] active:translate-y-px"
-          >
-            Try scenario
-            <ArrowRight size={16} weight="bold" />
-          </button>
-        </div>
-      </div>
-    </div>
   );
 }
 
