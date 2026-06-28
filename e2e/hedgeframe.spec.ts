@@ -8,13 +8,20 @@ test("weather event user can create and execute a Kalshi demo hedge", async ({
 
   await expect(
     page.getByRole("heading", {
-      name: "AI and prediction markets based hedging tool.",
+      name: "Name what you're afraid of. We'll find the hedge.",
     }),
   ).toBeVisible();
-  await expect(page.getByRole("button", { name: /Markets/ })).toBeVisible();
-  await expect(page.getByText("FEATURED WORKFLOW")).toBeVisible();
-  await expect(page.getByText("Built for exposed operators.")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Connect wallet" })).toBeVisible();
+  await expect(page.getByText("你担心什么，就说出来试试。")).toBeVisible();
+  const header = page.locator("header");
+  await expect(header.getByRole("link", { name: "How it works" })).toBeVisible();
+  await expect(header.getByRole("link", { name: "Use cases" })).toBeVisible();
+  await expect(header.getByRole("button", { name: /Markets/ })).toBeVisible();
+  await expect(header.getByRole("link", { name: "Try a scenario" })).toBeVisible();
+  await expect(header.getByRole("button", { name: "Connect wallet" })).toHaveCount(0);
+  await expect(page.getByText("REAL WORRY", { exact: true })).toBeVisible();
+  await expect(page.getByText("From one worry to one hedge path.")).toBeVisible();
+  await expect(page.getByText("Outdoor wedding planner")).toBeVisible();
+  await expect(page.getByText("For people carrying weird risk.")).toBeVisible();
 
   await page.mouse.wheel(0, 1600);
   await expect

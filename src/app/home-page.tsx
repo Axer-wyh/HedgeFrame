@@ -12,7 +12,6 @@ import {
   Plus,
   ShieldCheck,
   Sun,
-  Wallet,
 } from "@phosphor-icons/react";
 import {
   motion,
@@ -29,32 +28,74 @@ import { DecryptedText, Reveal } from "./motion-primitives";
 const sampleScenario =
   "My outdoor event loses $80k if heavy rain hits Austin on Oct 12.";
 
-const heroTitle = "AI and prediction markets based hedging tool.";
-const visionLinePrimary = "Build hedges faster with";
-const visionLineSecondary = "prediction-market tools.";
+const heroTitlePrimary = "Name what you're afraid of.";
+const heroTitleSecondary = "We'll find the hedge.";
+const heroTitle = `${heroTitlePrimary} ${heroTitleSecondary}`;
+const heroSubtitle =
+  "HedgeFrame turns a plain-words worry into a real, executable hedge on prediction markets. Not insurance. No paperwork.";
+const heroChineseLine = "你担心什么，就说出来试试。";
+const visionLinePrimary = "Plain-words worry to";
+const visionLineSecondary = "executable hedge.";
 const visionLine = `${visionLinePrimary} ${visionLineSecondary}`;
 
 const marketMenu = [
-  ["Weather events", "Rain, snow, heat, wind, and event-window exposure."],
-  ["Venue revenue", "Cancellation, access, and footfall-sensitive losses."],
-  ["Shipping route review", "Parsed and explained, blocked unless market fit is strong."],
-  ["Audit ledger", "Scenario, match version, quote, and demo response captured."],
+  ["Weather events", "Rain, heat, wind, and event windows matched to public contracts."],
+  ["Event revenue", "Cancellation, refunds, attendance pressure, and venue exposure."],
+  ["Shipping and freight", "Route disruption and cost jumps surfaced with clear confidence."],
+  ["Audit and limits", "Why it matches, why it may not, and when execution is blocked."],
+];
+
+const promptExamples = [
+  "My outdoor event loses $80k if heavy rain hits Austin on Oct 12.",
+  "My outdoor wedding loses $50k if it rains that day.",
+  "Our concert gets canceled by a typhoon and we can't cover refunds.",
+  "Freight costs jump 20% in the next three months.",
 ];
 
 const userGroups = [
-  ["Event organizers", "When the weather can erase a weekend of revenue."],
-  ["Venue owners", "When access, attendance, or cancellation risk hits the calendar."],
-  ["SMB finance", "When a budgeted exposure needs a transparent hedge path."],
-  ["Logistics coordinators", "When route risk needs a low-confidence review first."],
-  ["Brokers and advisors", "When clients need the basis risk explained before action."],
-  ["Risk ops", "When repeatable audit trails matter as much as the quote."],
+  ["Event organizers", "Weather can erase a weekend of ticket revenue."],
+  ["Venue owners", "Access, attendance, and refunds can hit the same calendar week."],
+  ["SMB finance", "A budgeted exposure needs a fast, explainable hedge path."],
+  ["Logistics coordinators", "Route risk needs low-confidence signals before anyone acts."],
+  ["Brokers and advisors", "Clients need basis risk explained in plain language."],
+  ["Risk ops", "Repeatable audit trails matter as much as the quote."],
+];
+
+const howItWorks = [
+  ["Say it", "Describe the worry in plain words."],
+  ["We map it", "We match it to a real market contract and explain the fit."],
+  ["Hedge it", "Simulate or place the hedge in one step."],
 ];
 
 const scenarios = [
-  ["Austin outdoor rain", "Heavy rainfall around an event date", "demo ready"],
-  ["Chicago snow closure", "Venue access and cancellation risk", "demo ready"],
-  ["Dallas heat attendance", "Weather-sensitive footfall", "review"],
-  ["Shipping route disruption", "Geopolitical route mapping", "low confidence"],
+  {
+    persona: "Outdoor wedding planner",
+    worry: "Rain on the venue date could erase $50k in deposits.",
+    outcome: "See weather contracts, estimated cost, and basis risk before committing.",
+    state: "demo ready",
+    example: "My outdoor wedding loses $50k if it rains that day.",
+  },
+  {
+    persona: "Concert producer",
+    worry: "A typhoon cancellation could force refunds before sponsor cash arrives.",
+    outcome: "Compare storm-linked markets and see why some are blocked.",
+    state: "review",
+    example: "Our concert gets canceled by a typhoon and we can't cover refunds.",
+  },
+  {
+    persona: "SMB importer",
+    worry: "Freight costs jumping 20% could wipe out the quarter's margin.",
+    outcome: "Surface freight, inflation, and shipping proxies with confidence notes.",
+    state: "proxy only",
+    example: "Freight costs jump 20% in the next three months.",
+  },
+  {
+    persona: "Route coordinator",
+    worry: "A geopolitical disruption could delay cargo without a clean contract match.",
+    outcome: "Show low-confidence markets, basis risk, and the no-trade reason.",
+    state: "low confidence",
+    example: "Middle East crude shipping route faces disruption next quarter.",
+  },
 ];
 
 export function HomePage() {
@@ -70,6 +111,13 @@ export function HomePage() {
 
     if (scenario.length < 10) return;
     router.push(`/markets?scenario=${encodeURIComponent(scenario)}`);
+  }
+
+  function chooseScenario(value: string) {
+    setRawText(value);
+    document
+      .getElementById("try-scenario")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   return (
@@ -92,16 +140,15 @@ export function HomePage() {
         }}
         onToneToggle={() => setTone((value) => (value === "dark" ? "light" : "dark"))}
         onLogin={() => setIdentityPanel("login")}
-        onWallet={() => setIdentityPanel("wallet")}
       />
 
       {marketsOpen ? <MarketsMegaMenu onClose={() => setMarketsOpen(false)} /> : null}
       {languageOpen ? <LanguageMenu onClose={() => setLanguageOpen(false)} /> : null}
 
       <PinnedHero rawText={rawText} onRawTextChange={setRawText} onSubmit={submitScenario} />
+      <HowItWorks />
+      <ScenarioLibrary onSelectScenario={chooseScenario} />
       <AudienceGrid />
-      <MarketSystem />
-      <ScenarioLibrary />
       <ExecutionBoundaries />
       <BottomPrompt rawText={rawText} onRawTextChange={setRawText} onSubmit={submitScenario} />
       <Footer />
@@ -121,7 +168,6 @@ function SiteHeader({
   onLanguageToggle,
   onToneToggle,
   onLogin,
-  onWallet,
 }: {
   marketsOpen: boolean;
   languageOpen: boolean;
@@ -130,11 +176,10 @@ function SiteHeader({
   onLanguageToggle: () => void;
   onToneToggle: () => void;
   onLogin: () => void;
-  onWallet: () => void;
 }) {
   return (
     <header className="fixed left-0 right-0 top-0 z-50 border-b border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-bg))]/94 backdrop-blur-xl">
-      <div className="grid h-14 grid-cols-[56px_190px_repeat(3,112px)_1fr_104px_152px_56px_56px] border-r border-[rgb(var(--hf-line))] max-xl:grid-cols-[56px_180px_repeat(3,100px)_1fr_92px_142px_52px_52px]">
+      <div className="grid h-14 grid-cols-[56px_190px_132px_116px_116px_1fr_104px_148px_56px_56px] border-r border-[rgb(var(--hf-line))] max-xl:grid-cols-[52px_170px_104px_96px_96px_1fr_92px_128px_52px_52px]">
         <a
           href="#top"
           aria-label="HedgeFrame home"
@@ -148,6 +193,18 @@ function SiteHeader({
         >
           HedgeFrame
         </a>
+        <a
+          href="#how-it-works"
+          className="flex items-center border-l border-[rgb(var(--hf-line))] px-4 text-sm transition hover:bg-[rgb(var(--hf-panel))]"
+        >
+          How it works
+        </a>
+        <a
+          href="#use-cases"
+          className="flex items-center border-l border-[rgb(var(--hf-line))] px-4 text-sm transition hover:bg-[rgb(var(--hf-panel))]"
+        >
+          Use cases
+        </a>
         <button
           type="button"
           onClick={onMarketsToggle}
@@ -157,18 +214,6 @@ function SiteHeader({
           Markets
           <CaretDown size={14} weight="bold" />
         </button>
-        <a
-          href="#teams"
-          className="flex items-center border-l border-[rgb(var(--hf-line))] px-4 text-sm transition hover:bg-[rgb(var(--hf-panel))]"
-        >
-          Teams
-        </a>
-        <a
-          href="#security"
-          className="flex items-center border-l border-[rgb(var(--hf-line))] px-4 text-sm transition hover:bg-[rgb(var(--hf-panel))]"
-        >
-          Security
-        </a>
         <a
           href="#about"
           className="flex items-center border-l border-[rgb(var(--hf-line))] px-4 text-sm transition hover:bg-[rgb(var(--hf-panel))]"
@@ -183,14 +228,12 @@ function SiteHeader({
           <LockKey size={15} />
           Log in
         </button>
-        <button
-          type="button"
-          onClick={onWallet}
+        <a
+          href="#try-scenario"
           className="flex items-center justify-center gap-2 border-l border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-accent))] text-sm font-semibold text-[rgb(var(--hf-ink))] transition hover:bg-[rgb(var(--hf-accent-soft))] active:translate-y-px"
         >
-          <Wallet size={15} weight="bold" />
-          Connect wallet
-        </button>
+          Try a scenario
+        </a>
         <button
           type="button"
           aria-expanded={languageOpen}
@@ -225,7 +268,7 @@ function MarketsMegaMenu({ onClose }: { onClose: () => void }) {
               onClick={onClose}
               className="min-h-36 border-b border-r border-[rgb(var(--hf-line))] p-6 text-left transition hover:bg-[rgb(var(--hf-panel))]"
             >
-              <span className="font-mono text-xs text-[rgb(var(--hf-accent))]">market path</span>
+              <span className="font-mono text-xs text-[rgb(var(--hf-accent))]">user path</span>
               <span className="mt-5 block text-2xl font-semibold tracking-[-0.03em]">
                 {title}
               </span>
@@ -237,17 +280,17 @@ function MarketsMegaMenu({ onClose }: { onClose: () => void }) {
         </div>
         <div className="bg-[rgb(var(--hf-panel-strong))] p-8">
           <div className="mb-10 flex items-center gap-2 font-mono text-xs text-[rgb(var(--hf-muted))]">
-            <DecryptedText text="mock provider / kalshi demo / polymarket read-only" />
+            <DecryptedText text="weather / events / freight / audit" />
           </div>
           <h2 className="max-w-[12ch] text-5xl font-semibold leading-none tracking-[-0.05em]">
-            Find the contract before the window closes.
+            Find the market before the risk window closes.
           </h2>
           <button
             type="button"
             onClick={onClose}
             className="mt-8 inline-flex h-11 items-center gap-2 bg-[rgb(var(--hf-accent))] px-4 text-sm font-semibold text-[rgb(var(--hf-ink))] transition hover:bg-[rgb(var(--hf-accent-soft))] active:translate-y-px"
           >
-            Open catalog
+            Try scenario
             <ArrowRight size={16} weight="bold" />
           </button>
         </div>
@@ -397,11 +440,18 @@ function PinnedHero({
         >
           <div className="flex h-full flex-col justify-end">
             <p className="mb-6 max-w-fit bg-[rgb(var(--hf-accent))] px-2 py-1 font-mono text-xs text-[rgb(var(--hf-ink))]">
-              Prediction-market hedge discovery
+              {heroChineseLine}
             </p>
-            <h1 className="max-w-[900px] text-[clamp(68px,7vw,116px)] font-semibold leading-[0.9] tracking-[-0.08em]">
-              {heroTitle}
+            <h1
+              aria-label={heroTitle}
+              className="max-w-[960px] text-[clamp(64px,5.9vw,96px)] font-semibold leading-[0.9] tracking-[-0.08em]"
+            >
+              <span className="block">{heroTitlePrimary}</span>
+              <span className="block">{heroTitleSecondary}</span>
             </h1>
+            <p className="mt-7 max-w-[640px] text-lg leading-7 text-[rgb(var(--hf-muted))]">
+              {heroSubtitle}
+            </p>
           </div>
         </motion.div>
 
@@ -422,14 +472,14 @@ function PinnedHero({
           className="absolute bottom-0 right-0 z-20 grid h-[330px] w-[432px] grid-rows-[1fr_auto] p-10"
         >
           <div className="space-y-5">
-            <div className="font-mono text-xs text-[rgb(var(--hf-muted))]">FEATURED WORKFLOW</div>
+            <div className="font-mono text-xs text-[rgb(var(--hf-muted))]">REAL WORRY</div>
             <div className="border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel))]">
               <div className="flex items-center gap-4 border-b border-[rgb(var(--hf-line))] p-4">
                 <CloudRain size={28} className="text-[rgb(var(--hf-accent))]" />
                 <div>
-                  <div className="text-sm font-semibold">Austin outdoor rain</div>
+                  <div className="text-sm font-semibold">Austin event rain risk</div>
                   <div className="text-xs text-[rgb(var(--hf-muted))]">
-                    5 candidates / 2 demo ready
+                    15 candidates / basis risk explained
                   </div>
                 </div>
               </div>
@@ -444,7 +494,7 @@ function PinnedHero({
             </div>
           </div>
           <p className="border-t border-[rgb(var(--hf-line))] pt-5 text-sm leading-6 text-[rgb(var(--hf-muted))]">
-            This is not insurance. Demo execution only.
+            We also flag weak fits before you trade.
           </p>
         </motion.div>
       </div>
@@ -464,6 +514,7 @@ function PromptBox({
   compact?: boolean;
 }) {
   const disabled = rawText.trim().length < 10;
+  const visibleExamples = compact ? promptExamples.slice(0, 2) : promptExamples;
 
   return (
     <div className="border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel-strong))] shadow-[0_24px_90px_rgba(0,0,0,0.26)]">
@@ -476,8 +527,25 @@ function PromptBox({
         onChange={(event) => onRawTextChange(event.target.value)}
         rows={compact ? 3 : 4}
         className="min-h-24 w-full resize-none border-0 bg-transparent px-5 py-4 text-base leading-7 text-[rgb(var(--hf-text))] outline-none placeholder:text-[rgb(var(--hf-muted))]"
-        placeholder="Describe the event, trigger, date range, and amount at risk..."
+        placeholder="Describe the event, trigger, date range, and amount at risk."
       />
+      <div className="border-t border-[rgb(var(--hf-line))] px-4 py-3">
+        <div className="mb-2 font-mono text-xs text-[rgb(var(--hf-muted))]">
+          Click a real worry to start
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {visibleExamples.map((example) => (
+            <button
+              key={example}
+              type="button"
+              onClick={() => onRawTextChange(example)}
+              className="border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-field))] px-3 py-2 text-left text-xs leading-5 text-[rgb(var(--hf-muted))] transition hover:border-[rgb(var(--hf-accent))] hover:text-[rgb(var(--hf-text))] active:translate-y-px"
+            >
+              {example}
+            </button>
+          ))}
+        </div>
+      </div>
       <div className="flex items-center justify-between border-t border-[rgb(var(--hf-line))] px-3 py-3">
         <button
           type="button"
@@ -502,7 +570,7 @@ function PromptBox({
         </div>
       </div>
       <p className="border-t border-[rgb(var(--hf-line))] px-5 py-3 text-sm text-[rgb(var(--hf-muted))]">
-        This is not insurance. Demo execution only.
+        Not insurance. Demo execution only.
       </p>
     </div>
   );
@@ -510,14 +578,14 @@ function PromptBox({
 
 function AudienceGrid() {
   return (
-    <section id="teams" className="border-b border-[rgb(var(--hf-line))]">
+    <section className="border-b border-[rgb(var(--hf-line))]">
       <div className="grid grid-cols-3">
         <div className="border-r border-[rgb(var(--hf-line))] p-10">
           <h2 className="text-6xl font-semibold leading-none tracking-[-0.07em]">
-            Built for exposed operators.
+            For people carrying weird risk.
           </h2>
           <p className="mt-6 max-w-[34ch] text-base leading-7 text-[rgb(var(--hf-muted))]">
-            The old path is slow underwriting language. The HedgeFrame path is scenario, market fit, quote, and audit trail.
+            The old path starts with forms and underwriting language. HedgeFrame starts with the worry in your own words.
           </p>
         </div>
         <div className="col-span-2 grid grid-cols-3">
@@ -527,8 +595,8 @@ function AudienceGrid() {
               delay={index * 0.03}
               className="min-h-56 border-b border-r border-[rgb(var(--hf-line))] p-6"
             >
-              <div className="mb-10 h-8 w-8 bg-[rgb(var(--hf-accent))] text-center font-mono text-sm leading-8 text-[rgb(var(--hf-ink))]">
-                {String(index + 1).padStart(2, "0")}
+              <div className="mb-10 inline-flex border border-[rgb(var(--hf-line))] px-2 py-1 font-mono text-xs text-[rgb(var(--hf-accent))]">
+                Hedge path
               </div>
               <h3 className="text-2xl font-semibold tracking-[-0.04em]">{title}</h3>
               <p className="mt-3 text-sm leading-6 text-[rgb(var(--hf-muted))]">{body}</p>
@@ -540,36 +608,36 @@ function AudienceGrid() {
   );
 }
 
-function MarketSystem() {
+function HowItWorks() {
   return (
-    <section className="border-b border-[rgb(var(--hf-line))]">
-      <div className="grid min-h-[760px] grid-cols-[0.9fr_1.1fr]">
+    <section id="how-it-works" className="border-b border-[rgb(var(--hf-line))]">
+      <div className="grid min-h-[680px] grid-cols-[0.92fr_1.08fr]">
         <div className="flex flex-col justify-between border-r border-[rgb(var(--hf-line))] p-10">
           <div>
             <DecryptedText
-              text="market fit / basis risk / execution gates"
+              text="plain words / market fit / hedge path"
               className="font-mono text-xs text-[rgb(var(--hf-accent))]"
             />
             <h2 className="mt-8 max-w-[11ch] text-7xl font-semibold leading-[0.9] tracking-[-0.08em]">
-              Not every match should trade.
+              From one worry to one hedge path.
             </h2>
           </div>
-          <p className="max-w-[42ch] text-base leading-7 text-[rgb(var(--hf-muted))]">
-            Candidate markets are valuable only when the settlement rule, event trigger, and time window survive review.
-          </p>
+          <div className="max-w-[43ch] space-y-4 text-base leading-7 text-[rgb(var(--hf-muted))]">
+            <p>
+              Describe the exposure, review the market fit, then simulate a demo execution path.
+            </p>
+            <p className="border-l border-[rgb(var(--hf-accent))] pl-4 text-[rgb(var(--hf-text))]">
+              {"We'll also tell you when a hedge isn't worth it."}
+            </p>
+          </div>
         </div>
-        <div className="grid grid-rows-4">
-          {[
-            ["Parse", "Object, place, date range, trigger, exposure, budget."],
-            ["Rank", "Event fit, location fit, time overlap, rule clarity, liquidity."],
-            ["Block", "Closed markets, stale quotes, weak basis, Polymarket read-only."],
-            ["Execute", "Limit-only Kalshi demo order with idempotency and audit response."],
-          ].map(([title, body]) => (
+        <div className="grid grid-rows-3">
+          {howItWorks.map(([title, body]) => (
             <div
               key={title}
-              className="grid grid-cols-[220px_1fr] border-b border-[rgb(var(--hf-line))]"
+              className="grid grid-cols-[240px_1fr] border-b border-[rgb(var(--hf-line))]"
             >
-              <div className="flex items-center border-r border-[rgb(var(--hf-line))] p-8 text-4xl font-semibold tracking-[-0.05em]">
+              <div className="flex items-center border-r border-[rgb(var(--hf-line))] p-8 text-5xl font-semibold tracking-[-0.06em]">
                 {title}
               </div>
               <div className="flex items-center p-8 text-2xl leading-tight tracking-[-0.035em] text-[rgb(var(--hf-muted))]">
@@ -583,33 +651,43 @@ function MarketSystem() {
   );
 }
 
-function ScenarioLibrary() {
+function ScenarioLibrary({
+  onSelectScenario,
+}: {
+  onSelectScenario: (value: string) => void;
+}) {
   return (
-    <section className="border-b border-[rgb(var(--hf-line))]">
-      <div className="grid grid-cols-4">
-        {scenarios.map(([title, body, state], index) => (
+    <section id="use-cases" className="border-b border-[rgb(var(--hf-line))]">
+      <div className="grid grid-cols-[1.15fr_0.95fr_0.95fr_0.95fr]">
+        {scenarios.map((scenario, index) => (
           <button
-            key={title}
+            key={scenario.persona}
             type="button"
-            className="group min-h-[440px] border-r border-[rgb(var(--hf-line))] p-6 text-left transition hover:bg-[rgb(var(--hf-panel))]"
+            onClick={() => onSelectScenario(scenario.example)}
+            className="group min-h-[500px] border-r border-[rgb(var(--hf-line))] p-6 text-left transition hover:bg-[rgb(var(--hf-panel))]"
           >
             <div className="mb-8 flex items-center justify-between">
-              <span className="font-mono text-xs text-[rgb(var(--hf-muted))]">
-                {String(index + 1).padStart(2, "0")}
-              </span>
+              <span className="font-mono text-xs text-[rgb(var(--hf-muted))]">Use case</span>
               <span className="border border-[rgb(var(--hf-line))] px-2 py-1 font-mono text-xs text-[rgb(var(--hf-accent))]">
-                {state}
+                {scenario.state}
               </span>
             </div>
-            <div className="mb-16 h-36 border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-field))]">
+            <div className="mb-12 h-32 border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-field))]">
               <MiniMarketGraphic index={index} />
             </div>
             <h3 className="text-4xl font-semibold leading-none tracking-[-0.06em] group-hover:text-[rgb(var(--hf-accent))]">
-              {title}
+              {scenario.persona}
             </h3>
-            <p className="mt-5 max-w-[25ch] text-sm leading-6 text-[rgb(var(--hf-muted))]">
-              {body}
+            <p className="mt-6 text-lg leading-7 tracking-[-0.02em]">
+              {scenario.worry}
             </p>
+            <p className="mt-5 max-w-[28ch] text-sm leading-6 text-[rgb(var(--hf-muted))]">
+              {scenario.outcome}
+            </p>
+            <span className="mt-10 inline-flex h-10 items-center gap-2 border border-[rgb(var(--hf-line))] px-3 text-sm font-semibold text-[rgb(var(--hf-text))] transition group-hover:border-[rgb(var(--hf-accent))] group-hover:bg-[rgb(var(--hf-accent))] group-hover:text-[rgb(var(--hf-ink))]">
+              Try this
+              <ArrowRight size={15} weight="bold" />
+            </span>
           </button>
         ))}
       </div>
@@ -619,12 +697,12 @@ function ScenarioLibrary() {
 
 function ExecutionBoundaries() {
   return (
-    <section id="security" className="border-b border-[rgb(var(--hf-line))]">
+    <section className="border-b border-[rgb(var(--hf-line))]">
       <div className="grid grid-cols-[0.9fr_1.1fr]">
         <div className="border-r border-[rgb(var(--hf-line))] p-10">
           <ShieldCheck size={34} className="text-[rgb(var(--hf-accent))]" />
           <h2 className="mt-8 max-w-[10ch] text-7xl font-semibold leading-[0.9] tracking-[-0.08em]">
-            Execution boundaries.
+            Trust before execution.
           </h2>
           <p className="mt-8 max-w-[40ch] text-base leading-7 text-[rgb(var(--hf-muted))]">
             The prototype helps discover and simulate hedges. It does not underwrite losses, hold funds, or store private keys.
@@ -667,12 +745,12 @@ function BottomPrompt({
       <div className="absolute inset-0 opacity-60">
         <PixelMosaic dense />
       </div>
-      <div className="relative mx-auto grid max-w-[1120px] gap-10 py-24 text-center">
+      <div id="try-scenario" className="relative mx-auto grid max-w-[1120px] gap-10 py-24 text-center">
         <h2 className="text-7xl font-semibold leading-[0.9] tracking-[-0.08em]">
-          Ready to map an exposure?
+          Making hedging a part of your life.
         </h2>
         <p className="mx-auto max-w-[52ch] text-base leading-7 text-[rgb(var(--hf-muted))]">
-          Describe the loss scenario, trigger, date range, and amount at risk. The workspace will show candidates and reasons to block execution.
+          Start with the thing that could hurt your calendar, cash flow, or route. HedgeFrame maps what can be matched and what should be blocked.
         </p>
         <PromptBox rawText={rawText} onRawTextChange={onRawTextChange} onSubmit={onSubmit} />
       </div>
@@ -686,14 +764,14 @@ function Footer() {
       <div className="border-r border-[rgb(var(--hf-line))] p-10">
         <BrandMark />
         <p className="mt-6 max-w-[32ch] text-[rgb(var(--hf-muted))]">
-          HedgeFrame is a prediction-market hedge discovery and demo execution assistant.
+          HedgeFrame turns plain-words worries into prediction-market hedge paths.
         </p>
       </div>
       <div className="grid grid-cols-4">
         {[
-          ["Product", "Weather events", "Venue revenue", "Shipping route review", "Audit ledger"],
+          ["Product", "How it works", "Use cases", "Markets", "Audit ledger"],
           ["Resources", "Market catalog", "Scenario library", "Kalshi demo guide", "Basis risk"],
-          ["Legal", "This is not insurance", "Risk disclosure", "Privacy", "Terms"],
+          ["Legal", "Disclosure", "Risk notice", "Privacy", "Terms"],
           ["Community", "Operator council", "Partner network", "X / Twitter", "LinkedIn"],
         ].map(([heading, ...links]) => (
           <div key={heading} className="border-r border-[rgb(var(--hf-line))] p-8">
