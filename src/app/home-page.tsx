@@ -537,7 +537,7 @@ function AudienceGrid() {
             ranked hedge path with explicit basis risk.
           </div>
         </div>
-        <div className="flex min-w-0 items-center overflow-hidden">
+        <div className="flex min-w-0 items-start overflow-hidden py-10">
           <LogoLoop
             logos={riskStories}
             speed={44}
@@ -548,7 +548,6 @@ function AudienceGrid() {
             fadeOut
             fadeOutColor="rgb(var(--hf-bg))"
             ariaLabel="Risk stories in motion"
-            className="py-10"
           />
         </div>
       </div>
@@ -570,7 +569,7 @@ function RiskStoryCard({
   outcome: string;
 }) {
   return (
-    <article className="grid h-[320px] w-[390px] grid-rows-[auto_1fr_auto] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel))] p-5 text-base shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+    <article className="grid h-[430px] w-[390px] grid-rows-[auto_1fr_auto] border border-[rgb(var(--hf-line))] bg-[rgb(var(--hf-panel))] p-5 text-base shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
       <div>
         <div className="mb-5 flex items-center justify-between gap-4">
           <span className="font-mono text-xs text-[rgb(var(--hf-muted))]">

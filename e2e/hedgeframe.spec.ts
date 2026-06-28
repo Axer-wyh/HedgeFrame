@@ -67,6 +67,28 @@ test("weather event user can create and execute a Kalshi demo hedge", async ({
   await expect(riskStoriesRail.getByText("Rain weekend exposure").first()).toBeVisible();
   await expect(riskStoriesRail.getByText("Pain").first()).toBeVisible();
   await expect(riskStoriesRail.getByText("HedgeFrame path").first()).toBeVisible();
+  const riskStoryLayout = await page
+    .getByRole("heading", { name: "For people carrying weird risk." })
+    .evaluate((heading) => {
+      const section = heading.closest("section");
+      const firstCard = section?.querySelector("article");
+      const cards = Array.from(section?.querySelectorAll("article") ?? []);
+      if (!section || !firstCard || cards.length === 0) return null;
+
+      const headingRect = heading.getBoundingClientRect();
+      const cardRect = firstCard.getBoundingClientRect();
+      const maxCardOverflow = Math.max(
+        ...cards.map((card) => card.scrollHeight - card.getBoundingClientRect().height),
+      );
+
+      return {
+        topDelta: Math.abs(headingRect.top - cardRect.top),
+        maxCardOverflow,
+      };
+    });
+  expect(riskStoryLayout).not.toBeNull();
+  expect(riskStoryLayout?.topDelta).toBeLessThanOrEqual(24);
+  expect(riskStoryLayout?.maxCardOverflow).toBeLessThanOrEqual(1);
   const firstRiskTransform = await riskStoriesRail
     .locator(".logoloop__track")
     .evaluate((element) => getComputedStyle(element).transform);
